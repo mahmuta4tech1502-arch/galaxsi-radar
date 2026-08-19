@@ -121,6 +121,20 @@
     </div>
   </section>
 
+  <section>
+    <div class="ttl">Coin Risk Taraması</div>
+    <div class="panel"><div class="phead"><span class="dot"></span>COIN_SORGU :: 17.000+ coin — adını yaz, tuzak var mı bak</div>
+    <div class="pbody">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="ci" placeholder="örn: PEPE, XRP, DOGE, SHIB…" autocomplete="off"
+          style="flex:1;min-width:180px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none">
+        <button id="cb" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.06em">TARA</button>
+      </div>
+      <div id="cres" style="margin-top:10px"></div>
+      <div class="item mut" style="margin-top:8px">// tarama kamuya açık verilerle yapılır · "bayrak yok" = güvenli demek DEĞİLDİR · yatırım tavsiyesi değildir</div>
+    </div></div>
+  </section>
+
   <div id="fresh"></div>
 
   <div class="panel"><div class="phead"><span class="dot"></span>DELIST_RADARI :: resmî borsa duyuruları</div><div class="pbody" id="delist"><div class="item mut">bağlanıyor…</div></div></div>
@@ -209,6 +223,47 @@ fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(functio
   if(kh.length)r+='<div class="item yel">⚠ kaynak erişilemedi: '+esc(kh.join(', '))+' — bu kaynaklar için durum <b>BİLİNMİYOR</b>.</div>';
   q('risk').innerHTML=r||'<div class="item mut">aktif alarm yok</div>';
 }).catch(function(){q('fresh').innerHTML='<div class="warnbox">⚠ Veri yüklenemedi — durum BİLİNMİYOR.</div>';});
+/* ── coin risk taramasi ── */
+(function(){
+  var btn=q('cb'),inp=q('ci'),res=q('cres'),delistSyms=[];
+  fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(function(d){delistSyms=(d.delist||[]).map(function(x){return x.sym})}).catch(function(){});
+  function fmt(n){return n>1e9?(n/1e9).toFixed(1)+'B':n>1e6?(n/1e6).toFixed(1)+'M':Math.round(n/1e3)+'K'}
+  function run(){
+    var t=(inp.value||'').trim();if(!t)return;
+    res.innerHTML='<div class="item mut">taranıyor: '+esc(t)+' …</div>';
+    fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(t))
+    .then(function(r){return r.json()}).then(function(s){
+      var c=(s.coins||[])[0];
+      if(!c){res.innerHTML='<div class="item yel">⚠ bulunamadı — sembolü/ismi kontrol et. Hiçbir listede olmaması başlı başına bir bayraktır.</div>';return;}
+      return fetch('https://api.coingecko.com/api/v3/coins/'+c.id+'?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=false')
+        .then(function(r){return r.json()}).then(function(d){render(d)});
+    }).catch(function(){res.innerHTML='<div class="item yel">⚠ kaynak meşgul/erişilemedi — 1 dk sonra tekrar dene. Şu an durum: BİLİNMİYOR.</div>';});
+  }
+  function render(d){
+    var f=[],w=[],md=d.market_data||{},dev=d.developer_data||{};
+    var sym=(d.symbol||'').toUpperCase();
+    if(delistSyms.indexOf(sym)>=0)f.push('⛔ <b>RESMÎ DELIST BAYRAĞI</b> — bir borsa bu coini listeden çıkarıyor (radarımızda aktif)');
+    var rank=d.market_cap_rank;
+    if(!rank)f.push('🚨 piyasa sıralaması YOK — çok küçük ya da ölü olabilir');
+    else if(rank>1000)w.push('⚠ sıralama #'+rank+' — düşük likidite bölgesi');
+    var mc=(md.market_cap||{}).usd||0,vol=(md.total_volume||{}).usd||0;
+    if(mc>0&&vol/mc<0.005)w.push('⚠ hacim/piyasa-değeri oranı çok düşük — çıkmak istediğinde alıcı bulamayabilirsin');
+    var athc=(md.ath_change_percentage||{}).usd;
+    if(athc!=null&&athc<-90)w.push('⚠ tüm-zamanlar zirvesinden %'+Math.abs(Math.round(athc))+' düşmüş');
+    if(dev.commit_count_4_weeks===0)w.push('💀 GitHub deposu 4 haftadır tamamen sessiz — geliştirme durmuş olabilir');
+    var down=d.sentiment_votes_down_percentage;
+    if(down&&down>50)w.push('⚠ topluluk oyu %'+Math.round(down)+' negatif');
+    var h='<div class="item" style="font-size:14px"><b class="cy">'+esc(d.name)+' ('+esc(sym)+')</b> <span class="mut">· sıralama '+(rank?'#'+rank:'yok')+(mc?' · piyasa değeri $'+fmt(mc):'')+'</span></div>';
+    for(var i=0;i<f.length;i++)h+='<div class="item red">'+f[i]+'</div>';
+    for(i=0;i<w.length;i++)h+='<div class="item yel">'+w[i]+'</div>';
+    if(!f.length&&!w.length)h+='<div class="item grn">✓ bu taramada bayrak çıkmadı <span class="mut">— bu GÜVENLİ demek DEĞİLDİR; sadece kontrol listemizde alarm yok</span></div>';
+    h+='<div class="item mut" style="margin-top:6px">// karar ve sonuç sana aittir — biz sadece tuzağı işaret ederiz</div>';
+    res.innerHTML=h;
+  }
+  btn.addEventListener('click',run);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')run()});
+})();
+
 fetch('./data/arkeoloji.json').then(function(r){return r.json()}).then(function(a){
   var h='',i;
   var sz=a.sizinti||[],szs=sz.filter(function(x){return x.supheli});
