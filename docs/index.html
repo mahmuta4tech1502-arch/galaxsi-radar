@@ -191,6 +191,15 @@
         <button class="sub" data-plan="1y" data-price="699">Abone Ol</button>
       </div>
     </div>
+    <div id="prostate"></div>
+    <div class="panel" style="margin-top:12px"><div class="phead"><span class="dot" style="background:var(--yel);box-shadow:0 0 8px var(--yel)"></span>ÜYELİK KODU :: hediye/kampanya kodun varsa gir</div>
+    <div class="pbody">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="pcode" placeholder="GX-XXXXX-XXXX" autocomplete="off" style="flex:1;min-width:160px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none;text-transform:uppercase">
+        <button id="pcgo" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.05em">ETKİNLEŞTİR</button>
+      </div>
+      <div id="pcmsg" class="item mut" style="margin-top:8px">// kodu olanlar Pro'yu buradan açar · kod yoksa yukarıdan abone ol</div>
+    </div></div>
     <div class="item mut" style="margin-top:10px">// ödeme uluslararası güvenli altyapıyla alınır · abonelik istediğin an iptal edilir · bu bir bilgi/risk servisidir, yatırım tavsiyesi değildir</div>
   </section>
 
@@ -362,6 +371,32 @@ mgo.addEventListener('click',function(){
   mdesc.innerHTML='<span class="yel">✅ Kaydın alındı! Bu paket açılınca '+esc(em)+' adresine haber verilecek.</span>';
   q('memail').style.display='none';mgo.style.display='none';
 });})();
+
+/* ── üyelik kodu sistemi (sadece SHA-256 özeti gömülü; kodun kendisi gizli) ── */
+(function(){
+  var HASHES={
+    'bdcbac36b68c3003cb4c0011bb942ca94919e26d12fd420475d6672b71f0b8da':'Kurucu',
+    '974a26a107349447ae106df1e507debc618a75299138802dc09e8bbadb7ab534':'Hediye'
+  };
+  var inp=q('pcode'),btn=q('pcgo'),msg=q('pcmsg'),state=q('prostate');
+  function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
+  function showActive(tip){
+    state.innerHTML='<div class="verdict v-safe" style="font-size:14px">✅ <b>GALAXSI Pro AKTİF</b> — '+esc(tip)+' üyeliği · sınırsız erişim</div>';
+    document.querySelectorAll('.plan .sub').forEach(function(b){b.textContent='✓ Zaten Pro';b.style.opacity='.55';b.disabled=true});
+  }
+  var saved=null;try{saved=JSON.parse(localStorage.getItem('gx_pro')||'null')}catch(e){}
+  if(saved&&saved.tip)showActive(saved.tip);
+  function activate(){
+    var code=(inp.value||'').trim().toUpperCase();if(!code)return;
+    msg.textContent='kontrol ediliyor…';
+    sha(code).then(function(hx){var m=HASHES[hx];
+      if(m){try{localStorage.setItem('gx_pro',JSON.stringify({tip:m,ts:Date.now()}))}catch(e){}
+        msg.innerHTML='<span class="grn">✓ Kod geçerli — Pro açıldı!</span>';showActive(m);state.scrollIntoView({behavior:'smooth'});}
+      else{msg.innerHTML='<span class="red">✗ Geçersiz kod.</span> Doğru yazdığından emin ol.';}
+    }).catch(function(){msg.innerHTML='<span class="yel">Tarayıcı kod doğrulamayı desteklemiyor (güvenli bağlantı gerekli).</span>'});
+  }
+  if(btn){btn.addEventListener('click',activate);inp.addEventListener('keydown',function(e){if(e.key==='Enter')activate()});}
+})();
 
 /* ── canli veri ── */
 fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(function(d){
