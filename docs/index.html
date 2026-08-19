@@ -306,18 +306,28 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
       return fetch('https://api.coingecko.com/api/v3/coins/'+c.id+'?localization=false&tickers=true&market_data=true&community_data=true&developer_data=true&sparkline=false').then(function(r){return r.json()}).then(render);
     }).catch(function(){res.innerHTML='<div class="warnbox">⚠ Veri kaynağı şu an meşgul/erişilemedi. Durum: <b>BİLİNMİYOR</b> — 1 dakika sonra tekrar dene.</div>'});}
 
+  function dt(s){if(!s)return '-';try{var x=new Date(s);return x.getDate()+'.'+(x.getMonth()+1)+'.'+x.getFullYear();}catch(e){return '-'}}
+  function strip(s){return s?String(s).replace(/<[^>]+>/g,'').replace(/\r?\n+/g,' ').replace(/\s+/g,' ').trim():''}
   function render(d){
     var md=d.market_data||{},dev=d.developer_data||{},com=d.community_data||{};
     var sym=(d.symbol||'').toUpperCase(),rank=d.market_cap_rank;
     var price=(md.current_price||{}).usd,mc=(md.market_cap||{}).usd||0,vol=(md.total_volume||{}).usd||0;
-    var ch24=(md.price_change_percentage_24h),ch7=(md.price_change_percentage_7d),ch30=(md.price_change_percentage_30d),ch1y=(md.price_change_percentage_1y);
-    var athc=(md.ath_change_percentage||{}).usd,atl=(md.atl||{}).usd;
+    var ch24=(md.price_change_percentage_24h),ch7=(md.price_change_percentage_7d),ch14=(md.price_change_percentage_14d),ch30=(md.price_change_percentage_30d),ch60=(md.price_change_percentage_60d),ch200=(md.price_change_percentage_200d),ch1y=(md.price_change_percentage_1y);
+    var athc=(md.ath_change_percentage||{}).usd,athp=(md.ath||{}).usd,athd=(md.ath_date||{}).usd;
+    var atl=(md.atl||{}).usd,atlc=(md.atl_change_percentage||{}).usd,atld=(md.atl_date||{}).usd;
+    var hi=(md.high_24h||{}).usd,lo=(md.low_24h||{}).usd,fdv=(md.fully_diluted_valuation||{}).usd;
     var circ=md.circulating_supply,maxs=md.max_supply,tot=md.total_supply;
     var cat=(d.categories||[]).filter(Boolean)[0]||'-';
     var yas=yasHesap(d.genesis_date);
+    var gy=d.genesis_date?d.genesis_date.slice(0,4):(athd?(''+athd).slice(0,4):null);
     var nEx=(d.tickers||[]).length;
     var down=d.sentiment_votes_down_percentage,up=d.sentiment_votes_up_percentage;
-    var commits=dev.commit_count_4_weeks,stars=dev.stars;
+    var commits=dev.commit_count_4_weeks,stars=dev.stars,forks=dev.forks,contrib=dev.pull_request_contributors,issues=dev.total_issues;
+    var tw=com.twitter_followers,rd=com.reddit_subscribers,tg=com.telegram_channel_user_count;
+    var home=((d.links||{}).homepage||[]).filter(Boolean)[0]||'';
+    var desc=strip((d.description||{}).en); if(desc.length>300)desc=desc.slice(0,300).replace(/\s\S*$/,'')+'…';
+    function ageT(){return yas==null?'-':(yas>=12?(yas/12).toFixed(1)+' yıl':yas+' ay')}
+    var devlbl=(commits>=20?'🟢 çok aktif':commits>0?'🟡 yavaş ('+commits+' commit)':commits===0?'🔴 durmuş / terk edilmiş olabilir':'❔ veri yok');
 
     /* bayraklar (agirlikli) */
     var danger=[],warn=[],good=[];
@@ -357,31 +367,65 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
     if(good.length){h+='<div class="rsec"><div class="h">✅ OLUMLU SİNYALLER</div>';
       for(i=0;i<good.length;i++)h+='<div class="rrow"><span class="v grn" style="text-align:left;font-weight:400">'+good[i]+'</span></div>';h+='</div>';}
 
-    h+='<div class="rsec"><div class="h">💵 FİYAT & HAREKET</div>'
+    h+='<div class="rsec"><div class="h">🪪 KİMLİK & TARİHÇE</div>'
+      +'<div class="rrow"><span class="k">Kategori</span><span class="v">'+esc(cat)+'</span></div>'
+      +'<div class="rrow"><span class="k">Piyasa sıralaması</span><span class="v">'+(rank?'#'+rank:'yok ⚠')+'</span></div>'
+      +'<div class="rrow"><span class="k">Çıkış · yaş</span><span class="v">'+(gy?gy+' · ':'')+ageT()+'</span></div>'
+      +'<div class="rrow"><span class="k">🔺 Zirve (ATH)</span><span class="v">'+(athp!=null?(athp<0.01?'$'+athp.toFixed(6):fmtUsd(athp)):'-')+' <span class="mut">('+dt(athd)+')</span></span></div>'
+      +'<div class="rrow"><span class="k">🔻 Dip (ATL)</span><span class="v">'+(atl!=null?(atl<0.01?'$'+atl.toFixed(8):fmtUsd(atl)):'-')+' <span class="mut">('+dt(atld)+')</span></span></div></div>';
+
+    h+='<div class="rsec"><div class="h">💵 FİYAT & 7 DÖNEM GEÇMİŞ</div>'
       +'<div class="rrow"><span class="k">Fiyat</span><span class="v">'+(price!=null?(price<0.01?'$'+price.toFixed(8):fmtUsd(price)):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">24s aralık</span><span class="v">'+(lo!=null&&hi!=null?fmtUsd(lo)+' – '+fmtUsd(hi):'-')+'</span></div>'
       +'<div class="rrow"><span class="k">24 saat</span><span class="v">'+pct(ch24)+'</span></div>'
       +'<div class="rrow"><span class="k">7 gün</span><span class="v">'+pct(ch7)+'</span></div>'
+      +'<div class="rrow"><span class="k">14 gün</span><span class="v">'+pct(ch14)+'</span></div>'
       +'<div class="rrow"><span class="k">30 gün</span><span class="v">'+pct(ch30)+'</span></div>'
+      +'<div class="rrow"><span class="k">60 gün</span><span class="v">'+pct(ch60)+'</span></div>'
+      +'<div class="rrow"><span class="k">200 gün</span><span class="v">'+pct(ch200)+'</span></div>'
       +'<div class="rrow"><span class="k">1 yıl</span><span class="v">'+pct(ch1y)+'</span></div>'
-      +'<div class="rrow"><span class="k">Zirveden (ATH)</span><span class="v '+(athc<-80?'red':athc<-40?'yel':'grn')+'">'+(athc!=null?'%'+Math.round(athc):'-')+'</span></div></div>';
+      +'<div class="rrow"><span class="k">Zirveden bugün</span><span class="v '+(athc<-80?'red':athc<-40?'yel':'grn')+'">'+(athc!=null?'%'+Math.round(athc):'-')+'</span></div></div>';
 
     h+='<div class="rsec"><div class="h">💧 BÜYÜKLÜK & LİKİDİTE</div>'
       +'<div class="rrow"><span class="k">Piyasa değeri</span><span class="v">'+fmtUsd(mc)+'</span></div>'
+      +'<div class="rrow"><span class="k">Tam seyreltilmiş (FDV)</span><span class="v">'+(fdv?fmtUsd(fdv):'-')+'</span></div>'
       +'<div class="rrow"><span class="k">24s hacim</span><span class="v">'+fmtUsd(vol)+'</span></div>'
       +'<div class="rrow"><span class="k">Hacim/Değer oranı</span><span class="v '+(mc&&vol/mc<0.01?'yel':'grn')+'">'+(mc?'%'+(vol/mc*100).toFixed(1):'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">İşlem çifti sayısı</span><span class="v">'+(nEx||'-')+'</span></div></div>';
+      +'<div class="rrow"><span class="k">İşlem çifti (borsa)</span><span class="v">'+(nEx||'-')+'</span></div></div>';
 
-    h+='<div class="rsec"><div class="h">🪙 ARZ & YAŞ</div>'
+    h+='<div class="rsec"><div class="h">🪙 ARZ</div>'
       +'<div class="rrow"><span class="k">Dolaşan arz</span><span class="v">'+fmtNum(circ)+' '+esc(sym)+'</span></div>'
+      +'<div class="rrow"><span class="k">Toplam arz</span><span class="v">'+(tot?fmtNum(tot):'-')+'</span></div>'
       +'<div class="rrow"><span class="k">Maksimum arz</span><span class="v">'+(maxs?fmtNum(maxs):'sınırsız/belirsiz')+'</span></div>'
-      +'<div class="rrow"><span class="k">Dolaşımda oran</span><span class="v">'+(maxs&&circ?'%'+Math.round(circ/maxs*100):'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Proje yaşı</span><span class="v">'+(yas!=null?(yas>=12?(yas/12).toFixed(1)+' yıl':yas+' ay'):'-')+'</span></div></div>';
+      +'<div class="rrow"><span class="k">Dolaşımda oran</span><span class="v">'+(maxs&&circ?'%'+Math.round(circ/maxs*100):'-')+'</span></div></div>';
 
-    h+='<div class="rsec"><div class="h">👥 TOPLULUK & GELİŞTİRME</div>'
-      +'<div class="rrow"><span class="k">GitHub commit (4hf)</span><span class="v '+(commits===0?'red':commits>=20?'grn':'yel')+'">'+(commits!=null?commits:'-')+'</span></div>'
+    h+='<div class="rsec"><div class="h">👥 TOPLULUK</div>'
+      +'<div class="rrow"><span class="k">Topluluk güveni</span><span class="v '+(up>=70?'grn':down>=60?'red':'yel')+'">'+(up!=null?'%'+Math.round(up)+' olumlu':'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Twitter takipçi</span><span class="v">'+(tw?fmtNum(tw):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Reddit üye</span><span class="v">'+(rd?fmtNum(rd):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Telegram üye</span><span class="v">'+(tg?fmtNum(tg):'-')+'</span></div></div>';
+
+    h+='<div class="rsec"><div class="h">🛠️ GELİŞTİRME — canlı mı, ölü mü?</div>'
+      +'<div class="rrow"><span class="k">Durum</span><span class="v '+(commits>=20?'grn':commits>0?'yel':commits===0?'red':'mut')+'">'+devlbl+'</span></div>'
+      +'<div class="rrow"><span class="k">Son 4 hafta commit</span><span class="v">'+(commits!=null?commits:'-')+'</span></div>'
       +'<div class="rrow"><span class="k">GitHub yıldız</span><span class="v">'+(stars!=null?fmtNum(stars):'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Topluluk güveni</span><span class="v">'+(up!=null?'%'+Math.round(up)+' olumlu':'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Twitter takipçi</span><span class="v">'+(com.twitter_followers?fmtNum(com.twitter_followers):'-')+'</span></div></div>';
+      +'<div class="rrow"><span class="k">Fork · katkıcı · issue</span><span class="v">'+(forks!=null?fmtNum(forks):'-')+' · '+(contrib!=null?contrib:'-')+' · '+(issues!=null?fmtNum(issues):'-')+'</span></div></div>';
+
+    if(desc||home){h+='<div class="rsec"><div class="h">📖 '+esc(d.name)+' NEDİR?</div>'
+      +(desc?'<div class="rrow" style="display:block"><span class="v" style="text-align:left;font-weight:400;line-height:1.55">'+esc(desc)+'</span></div>':'')
+      +(home?'<div class="rrow"><span class="k">Resmî site</span><span class="v"><a href="'+esc(home)+'" target="_blank" rel="noopener" style="color:var(--cyan)">'+esc(home.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</a></span></div>':'')+'</div>';}
+
+    /* ── SIK SORULAN SORULAR (veriden üretilmiş) ── */
+    function qa(a,b){return '<div class="rrow" style="display:block;padding:8px 12px"><div class="grn" style="font-weight:600">'+a+'</div><div style="color:var(--txt);font-weight:400;margin-top:3px;line-height:1.55">'+b+'</div></div>'}
+    var faq='<div class="rsec"><div class="h">❓ SIK SORULAN SORULAR</div>';
+    faq+=qa('⏳ '+esc(d.name)+' ne kadar köklü ve güvenilir bir proje?',(gy?gy+' yılında çıktı, ':'')+(yas!=null?'yaklaşık '+ageT()+' piyasada. ':'')+(yas!=null&&yas>=36&&rank&&rank<=100?'Kripto standartlarında <b>köklü ve kanıtlanmış</b> sayılır 🟢':yas!=null&&yas<12?'<b>Çok genç</b> — geçmişi kanıtlanmamış, en riskli dönemde 🔴':'Orta yaşta; geçmişi var ama garanti değil 🟡'));
+    faq+=qa('📉 Fiyatı neden bu halde, şu an pahalı mı?',athc!=null?('Tüm zamanlar zirvesi '+(athp!=null?(athp<0.01?'$'+athp.toFixed(6):fmtUsd(athp)):'-')+' idi ('+dt(athd)+'). Bugün oradan <b>%'+Math.abs(Math.round(athc))+' '+(athc<0?'aşağıda':'yukarıda')+'</b>. '+(athc<-80?'Zirveyi gören alıcıların çoğu hâlâ ağır zararda; eski seviyeye dönmesi için çok büyük yükseliş gerekir ⚠️':athc<-40?'Zirveden belirgin uzakta, toparlanma alanı var':'Zirveye yakın — pahalı/tepe bölgesi riski')):'Fiyat geçmişi verisi yok.');
+    faq+=qa('💰 Aldığımı sonra rahat satabilir miyim?',mc&&vol?('Günlük hacim '+fmtUsd(vol)+' (piyasa değerinin %'+(vol/mc*100).toFixed(1)+'\'i). '+(vol/mc>=0.05?'Yüksek — rahat alınıp satılıyor 🟢':vol/mc<0.01?'<b>Düşük</b> — büyük miktarı satmak zor, fiyatı kendin düşürürsün (likidite tuzağı) 🔴':'Orta — normal miktar sorun değil 🟡')):'Likidite verisi yetersiz.');
+    faq+=qa('⛔ Borsadan atılma (delist) riski var mı?',delistSyms.indexOf(sym)>=0?'<b>EVET</b> — radarımızda ŞU AN aktif delist bayrağı var! Bir borsa çıkarıyor 🔴':(rank&&rank<=200&&nEx>=20?'Şu an düşük: büyük ve '+nEx+' işlem çiftinde listeli 🟢 (yine de takip et)':'Düşük sıralama / az borsa delist riskini artırır — yakından izle 🟡'));
+    var scamR=[];if(yas!=null&&yas<6)scamR.push('çok yeni');if(commits===0)scamR.push('geliştirme durmuş');if(!rank)scamR.push('sıralaması yok');if(nEx&&nEx<3)scamR.push('çok az borsada');
+    faq+=qa('🕵️ Scam / rug-pull olabilir mi?',scamR.length?('Dikkat: <b>'+scamR.join(', ')+'</b>. Bu profildeki coinlerde rug/scam riski daha yüksek — küçük başla, kaybetmeyi göze alamayacağın parayı koyma 🔴':'Klasik rug profiline uymuyor (köklü/aktif/çok borsada) 🟢 — ama hiçbir kripto %100 garanti değil, yine de temkinli ol.');
+    faq+=qa('🔮 Fiyatı yükselir mi, geleceği ne?','Bunu <b>KİMSE bilemez</b> — "kesin yükselir/uçar" diyen herkes yalan söylüyor. Biz geleceği tahmin etmeyiz, sadece BUGÜNKÜ riski gösteririz. Yukarıdaki bayraklar kararına yardımcı olur; sonuç ve sorumluluk sana aittir 🤝');
+    faq+='</div>';h+=faq;
 
     /* sade Türkçe özet — herkes anlasın */
     var ozet,ocls;
