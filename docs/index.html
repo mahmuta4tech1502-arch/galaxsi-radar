@@ -340,21 +340,26 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')run()});
 })();
 
+/* ── ödeme linkleri (NOWPayments — hazır oldukça eklenir) ── */
+window.GX_PAY={'7g':'https://nowpayments.io/payment/?iid=4344633354'};
 /* ── abonelik modal ── */
 (function(){var modal=q('modal'),mt=q('mtitle'),mdesc=q('mdesc'),mgo=q('mgo'),cur=null;
 var names={'7g':'7 Günlük Pro','30g':'30 Günlük Pro','1y':'1 Yıllık Pro'};
 document.querySelectorAll('.sub').forEach(function(b){b.addEventListener('click',function(){
   cur={plan:b.getAttribute('data-plan'),price:b.getAttribute('data-price')};
+  var link=(window.GX_PAY||{})[cur.plan];
   mt.textContent='GALAXSI Pro — '+names[cur.plan];
-  mdesc.innerHTML='<span class="grn">$'+cur.price+'</span> · anlık Telegram alarmı + sınırsız tarama';
+  if(link){mdesc.innerHTML='<span class="grn">$'+cur.price+'</span> · güvenli kripto ödeme (BTC/USDT/XRP/DOGE)';}
+  else{mdesc.innerHTML='<span class="grn">$'+cur.price+'</span> · <span class="yel">bu paket çok yakında ödemeye açılıyor</span>';}
+  q('memail').style.display=link?'none':'block';q('memail').style.borderColor='';
+  mgo.textContent=link?'💳 Güvenli Ödemeye Geç →':'Haber Ver';mgo.style.display='block';
   modal.classList.add('on');});});
 mgo.addEventListener('click',function(){
+  var links=(window.GX_PAY||{});
+  if(links[cur.plan]){location.href=links[cur.plan];return;}
   var em=q('memail').value.trim();
   if(!em||em.indexOf('@')<0){q('memail').style.borderColor='var(--red)';return;}
-  /* ödeme linki entegrasyonu: window.GX_PAY[plan] varsa oraya yönlendir */
-  var links=(window.GX_PAY||{});
-  if(links[cur.plan]){location.href=links[cur.plan]+(links[cur.plan].indexOf('?')<0?'?':'&')+'email='+encodeURIComponent(em);return;}
-  mdesc.innerHTML='<span class="yel">✅ Kaydın alındı! Ödeme kanalı aktifleşince '+esc(em)+' adresine davet gönderilecek.</span>';
+  mdesc.innerHTML='<span class="yel">✅ Kaydın alındı! Bu paket açılınca '+esc(em)+' adresine haber verilecek.</span>';
   q('memail').style.display='none';mgo.style.display='none';
 });})();
 
