@@ -4,39 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
-<meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
+<meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
 <style>
   :root{
     --bg:#050807; --panel:#0a100d; --line:#123822; --line2:#1e5c37;
-    --grn:#39ff88; --grn-dim:#1f8f52; --red:#ff4d5e; --yel:#ffd166; --cyan:#5ce1e6;
+    --grn:#39ff88; --grn-dim:#1f8f52; --red:#ff4d5e; --yel:#ffd166; --cyan:#5ce1e6; --org:#ff9f43;
     --txt:#c9e8d4; --mut:#5f8a70;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--txt);font:14px/1.6 "Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;overflow-x:hidden}
   ::selection{background:var(--grn);color:#000}
+  #rain{position:fixed;inset:0;z-index:0;opacity:.14;pointer-events:none}
+  body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.13) 2px 4px)}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.5))}
+  .wrap{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:22px 15px 70px}
 
-  /* ── kod yagmuru ── */
-  #rain{position:fixed;inset:0;z-index:0;opacity:.16;pointer-events:none}
-  /* ── scanline / CRT dokusu ── */
-  body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.14) 2px 4px);}
-  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55));}
-
-  .wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:26px 16px 70px}
-
-  /* ── boot ekrani ── */
-  #boot{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .6s}
+  #boot{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s;gap:16px}
   #boot.done{opacity:0;pointer-events:none}
-  #bootlog{width:min(560px,90vw);color:var(--grn);font-size:13px;white-space:pre-wrap}
+  #bootlog{width:min(540px,88vw);color:var(--grn);font-size:13px;white-space:pre-wrap;min-height:120px}
+  #bootskip{background:transparent;border:1px solid var(--grn-dim);color:var(--mut);border-radius:6px;padding:7px 18px;font:inherit;font-size:12px;cursor:pointer}
   .cursor{display:inline-block;width:8px;height:14px;background:var(--grn);animation:blink 1s steps(1) infinite;vertical-align:-2px}
   @keyframes blink{50%{opacity:0}}
 
-  /* ── hero ── */
-  header{padding:34px 0 10px;text-align:center}
-  .logo{font-size:clamp(34px,8vw,58px);font-weight:700;letter-spacing:.12em;color:var(--grn);
-    text-shadow:0 0 18px rgba(57,255,136,.45),0 0 60px rgba(57,255,136,.15);position:relative;display:inline-block}
+  header{padding:28px 0 6px;text-align:center}
+  .logo{font-size:clamp(32px,8vw,56px);font-weight:700;letter-spacing:.12em;color:var(--grn);text-shadow:0 0 18px rgba(57,255,136,.45),0 0 60px rgba(57,255,136,.15);position:relative;display:inline-block}
   .logo::before,.logo::after{content:"GALAXSI";position:absolute;left:0;top:0;width:100%;overflow:hidden;opacity:0}
   .logo::before{color:var(--red);animation:gl1 5s infinite steps(1)}
   .logo::after{color:var(--cyan);animation:gl2 6s infinite steps(1)}
@@ -45,250 +37,341 @@
   .tag{margin-top:10px;font-size:15px;color:var(--txt)}
   .tag b{color:var(--red)}
   .sub{margin-top:6px;font-size:12.5px;color:var(--mut)}
+  .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .btn{border:0;border-radius:7px;padding:11px 22px;font:inherit;font-weight:700;letter-spacing:.05em;cursor:pointer;text-decoration:none;display:inline-block}
+  .btn-p{background:var(--grn);color:#04140b}
+  .btn-g{background:#12241a;border:1px solid var(--line2);color:var(--grn)}
 
-  /* ── stat bar ── */
   .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 6px}
-  .stat{border:1px solid var(--line2);background:rgba(10,16,13,.85);border-radius:6px;padding:9px 16px;min-width:120px}
+  .stat{border:1px solid var(--line2);background:rgba(10,16,13,.85);border-radius:6px;padding:9px 16px;min-width:118px}
   .stat .n{font-size:22px;color:var(--grn);font-weight:700;text-shadow:0 0 12px rgba(57,255,136,.35)}
-  .stat .l{font-size:10.5px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+  .stat .l{font-size:10.5px;color:var(--mut);letter-spacing:.07em;text-transform:uppercase}
 
-  /* ── tanitim paneli ── */
-  .intro{margin:26px 0 8px}
-  .ttl{color:var(--grn);font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:26px 0 10px}
+  .ttl{color:var(--grn);font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:30px 0 10px}
   .ttl::before{content:"▚ ";color:var(--grn-dim)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-  .card{border:1px solid var(--line);background:rgba(10,16,13,.88);border-radius:8px;padding:16px 16px 14px;position:relative;overflow:hidden}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px}
+  .card{border:1px solid var(--line);background:rgba(10,16,13,.88);border-radius:8px;padding:16px;position:relative;overflow:hidden}
   .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--grn-dim)}
   .card h3{color:var(--txt);font-size:14px;margin-bottom:6px}
   .card p{font-size:12.5px;color:var(--mut)}
   .card .ic{font-size:20px;margin-bottom:8px;display:block}
-
   .creed{border:1px dashed var(--line2);border-radius:8px;padding:14px 16px;margin-top:12px;font-size:12.5px;color:var(--txt);background:rgba(57,255,136,.03)}
   .creed b{color:var(--grn)}
 
-  /* ── canli veri panelleri ── */
   .panel{border:1px solid var(--line);background:rgba(10,16,13,.9);border-radius:8px;margin:14px 0;overflow:hidden}
   .phead{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:rgba(18,56,34,.25);font-size:12.5px;color:var(--grn)}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:pulse 2s infinite}
   @keyframes pulse{50%{opacity:.4}}
   .pbody{padding:12px 16px}
   .item{font-size:12.8px;margin:3px 0}
-  .red{color:var(--red)} .yel{color:var(--yel)} .grn{color:var(--grn)} .mut{color:var(--mut)} .cy{color:var(--cyan)}
+  .red{color:var(--red)} .yel{color:var(--yel)} .grn{color:var(--grn)} .mut{color:var(--mut)} .cy{color:var(--cyan)} .org{color:var(--org)}
   .chip{display:inline-block;margin:2px 8px 2px 0}
   .warnbox{border:1px solid #7a5d10;background:rgba(255,209,102,.07);border-radius:8px;padding:11px 14px;margin:14px 0;color:var(--yel);font-size:12.8px}
+
+  /* coin rapor karti */
+  .verdict{border-radius:8px;padding:12px 16px;margin-bottom:12px;font-weight:700;font-size:15px;border:1px solid}
+  .v-safe{background:rgba(57,255,136,.08);border-color:var(--line2);color:var(--grn)}
+  .v-mid{background:rgba(255,209,102,.08);border-color:#7a5d10;color:var(--yel)}
+  .v-high{background:rgba(255,159,67,.09);border-color:#8a4b12;color:var(--org)}
+  .v-danger{background:rgba(255,77,94,.1);border-color:#7a1520;color:var(--red)}
+  .rsec{border:1px solid var(--line);border-radius:7px;margin:8px 0;overflow:hidden}
+  .rsec>.h{padding:7px 12px;background:rgba(18,56,34,.18);font-size:12px;color:var(--cyan);letter-spacing:.05em}
+  .rrow{display:flex;justify-content:space-between;gap:10px;padding:5px 12px;font-size:12.6px;border-top:1px solid rgba(18,56,34,.5)}
+  .rrow .k{color:var(--mut)} .rrow .v{text-align:right;font-weight:600}
+
+  /* fiyatlandirma */
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:4px}
+  .plan{border:1px solid var(--line);background:rgba(10,16,13,.9);border-radius:10px;padding:18px 16px;position:relative;text-align:center}
+  .plan.best{border-color:var(--grn);box-shadow:0 0 24px rgba(57,255,136,.12)}
+  .plan .badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--grn);color:#04140b;font-size:10.5px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:.06em;white-space:nowrap}
+  .plan .dur{color:var(--cyan);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+  .plan .price{font-size:34px;font-weight:700;color:var(--grn);margin:8px 0 2px;text-shadow:0 0 14px rgba(57,255,136,.3)}
+  .plan .price small{font-size:14px;color:var(--mut)}
+  .plan .old{color:var(--mut);text-decoration:line-through;font-size:13px}
+  .plan .save{color:var(--yel);font-size:11.5px;margin-top:2px}
+  .plan ul{list-style:none;text-align:left;margin:12px 0;font-size:12.3px;color:var(--txt)}
+  .plan li{margin:5px 0}.plan li::before{content:"✓ ";color:var(--grn)}
+  .plan .sub{display:block;background:var(--grn);color:#04140b;border:0;border-radius:7px;padding:11px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.05em;width:100%}
+  .plan.best .sub{box-shadow:0 0 16px rgba(57,255,136,.35)}
+
+  /* modal */
+  #modal{position:fixed;inset:0;z-index:30;background:rgba(3,6,5,.88);display:none;align-items:center;justify-content:center;padding:16px}
+  #modal.on{display:flex}
+  .mbox{background:var(--panel);border:1px solid var(--line2);border-radius:12px;max-width:440px;width:100%;padding:22px;position:relative}
+  .mbox h3{color:var(--grn);font-size:17px;margin-bottom:4px}
+  .mbox .x{position:absolute;top:12px;right:16px;color:var(--mut);cursor:pointer;font-size:20px;background:none;border:0}
+  .mbox input{width:100%;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;margin-top:8px;outline:none}
+  .mbox .go{width:100%;background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:11px;font:inherit;font-weight:700;margin-top:10px;cursor:pointer}
 
   footer{margin-top:34px;border-top:1px solid var(--line);padding-top:14px;font-size:11.5px;color:var(--mut)}
   footer b{color:var(--txt)}
   a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
-  @media (prefers-reduced-motion: reduce){
-    #rain{display:none} .logo::before,.logo::after{animation:none} .dot{animation:none}
-  }
+  input#ci{flex:1;min-width:180px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:11px 13px;color:var(--grn);font:inherit;outline:none}
+  button#cb{background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:11px 22px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.06em}
+  @media (prefers-reduced-motion: reduce){#rain{display:none}.logo::before,.logo::after{animation:none}.dot{animation:none}}
 </style>
 </head>
 <body>
 <canvas id="rain"></canvas>
 <div class="vignette"></div>
 
-<div id="boot"><div id="bootlog"></div></div>
+<div id="boot"><div id="bootlog"></div><button id="bootskip">[ ATLA → radara gir ]</button></div>
 
 <div class="wrap">
   <header>
     <div class="logo">GALAXSI</div>
     <div class="tag">Kripto <b>Tehlike</b> Radarı — tuzakları insanlardan önce görür</div>
-    <div class="sub">// kâr sinyali satmayız · riski gösteririz · yalan söylemektense "BİLİNMİYOR" deriz</div>
+    <div class="sub">// bir coin güvenilir mi? yatırımdan önce 5 saniyede tara · kâr sinyali satmayız · riski gösteririz</div>
+    <div class="cta">
+      <a href="#tara" class="btn btn-p">🔍 COIN TARA</a>
+      <a href="#pro" class="btn btn-g">⭐ PRO ÜYELİK</a>
+    </div>
   </header>
 
   <div class="stats">
     <div class="stat"><div class="n" id="s-flags">—</div><div class="l">aktif tehlike bayrağı</div></div>
+    <div class="stat"><div class="n">17K+</div><div class="l">taranabilir coin</div></div>
     <div class="stat"><div class="n">7+</div><div class="l">bağımsız veri kaynağı</div></div>
-    <div class="stat"><div class="n">144</div><div class="l">gömülen strateji (mezarlık)</div></div>
     <div class="stat"><div class="n" id="s-age">—</div><div class="l">son tarama</div></div>
   </div>
 
-  <section class="intro">
+  <section>
     <div class="ttl">Bu sistem ne yapar</div>
     <div class="grid">
-      <div class="card"><span class="ic">⛔</span><h3>Resmî Delist Takibi</h3>
-        <p>Binance ve OKX'in <b>kendi resmî duyurularını</b> saatlik tarar. Delist kararı tahmin değildir — borsa o coini bitirmiştir. Sen haberi duymadan bayrak burada yanar.</p></div>
-      <div class="card"><span class="ic">🕵️</span><h3>Sızıntı Arkeolojisi</h3>
-        <p>Delist duyurusundan <b>önceki 48 saati</b> ölçer: anormal satış ve hacim = birileri önceden biliyordu. İstatistiksel kanıt üretir, isim suçlamaz.</p></div>
-      <div class="card"><span class="ic">🚨</span><h3>Anlık Alarm Ağı</h3>
-        <p>Stablecoin depeg, aşırı funding (kalabalık pozisyon), open-interest çöküşü (büyük oyuncu kaçışı), ölü GitHub projeleri, yeni-listing tuzağı istatistiği.</p></div>
+      <div class="card"><span class="ic">🔍</span><h3>Coin Risk Taraması</h3><p>17.000+ coinden herhangi birinin adını yaz — fiyat, likidite, arz, geliştirme ve borsa durumunu tarayıp <b>tuzak bayraklarını</b> tek ekranda gösterir.</p></div>
+      <div class="card"><span class="ic">⛔</span><h3>Resmî Delist Takibi</h3><p>Binance ve OKX'in <b>kendi resmî duyurularını</b> saatlik tarar. Delist kararı tahmin değildir — sen duymadan bayrak burada yanar.</p></div>
+      <div class="card"><span class="ic">🕵️</span><h3>Sızıntı Arkeolojisi</h3><p>Delist duyurusundan <b>önceki 48 saati</b> ölçer: anormal satış = birileri önceden biliyordu. İstatistiksel kanıt üretir.</p></div>
     </div>
-    <div class="creed">
-      <b>Dürüstlük protokolü:</b> Kaynak çökerse "temiz" demeyiz, <b>BİLİNMİYOR</b> deriz · veri eskirse ekranda uyarı yanar ·
-      başarısız olan her stratejimizi mezarlıkta yayınlarız · "kesin kazandıran" diyen herkes yalan söylüyordur — biz dahil olsaydık.
-    </div>
+    <div class="creed"><b>Dürüstlük protokolü:</b> Kaynak çökerse "temiz" demeyiz, <b>BİLİNMİYOR</b> deriz · veri eskirse ekranda uyarı yanar · başarısız stratejilerimizi bile mezarlıkta yayınlarız · <b>"kesin kazandıran" diyen herkes yalan söylüyordur</b> — biz dahil olsaydık.</div>
   </section>
 
-  <section>
+  <section id="tara">
     <div class="ttl">Coin Risk Taraması</div>
-    <div class="panel"><div class="phead"><span class="dot"></span>COIN_SORGU :: 17.000+ coin — adını yaz, tuzak var mı bak</div>
+    <div class="panel"><div class="phead"><span class="dot"></span>COIN_SORGU :: adını yaz → tam risk raporu</div>
     <div class="pbody">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="ci" placeholder="örn: PEPE, XRP, DOGE, SHIB…" autocomplete="off"
-          style="flex:1;min-width:180px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none">
-        <button id="cb" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.06em">TARA</button>
+        <input id="ci" placeholder="örn: PEPE, XRP, DOGE, ACX, SHIB…" autocomplete="off">
+        <button id="cb">TARA</button>
       </div>
-      <div id="cres" style="margin-top:10px"></div>
-      <div class="item mut" style="margin-top:8px">// tarama kamuya açık verilerle yapılır · "bayrak yok" = güvenli demek DEĞİLDİR · yatırım tavsiyesi değildir</div>
+      <div id="cres" style="margin-top:12px"><div class="item mut">// bir coin adı yaz ve TARA'ya bas — saniyeler içinde tam risk kartı</div></div>
     </div></div>
   </section>
 
   <div id="fresh"></div>
-
   <div class="panel"><div class="phead"><span class="dot"></span>DELIST_RADARI :: resmî borsa duyuruları</div><div class="pbody" id="delist"><div class="item mut">bağlanıyor…</div></div></div>
   <div class="panel"><div class="phead"><span class="dot"></span>ALARM_AGI :: depeg / funding / open-interest</div><div class="pbody" id="risk"><div class="item mut">bağlanıyor…</div></div></div>
   <div class="panel"><div class="phead"><span class="dot"></span>ARKEOLOJI :: geçmişin ölçümü — tahmin değil</div><div class="pbody" id="ark"><div class="item mut">günlük analiz bekleniyor…</div></div></div>
 
   <section id="pro">
-    <div class="ttl">GALAXSI Pro</div>
-    <div class="panel" style="border-color:var(--line2)">
-      <div class="phead"><span class="dot" style="background:var(--yel);box-shadow:0 0 8px var(--yel)"></span>PRO :: bayrak yandığı SANİYE haberin olsun</div>
-      <div class="pbody">
-        <div class="item">Site her saat güncellenir — <b class="yel">Pro üyeler bayrağı anında Telegram'dan alır.</b></div>
-        <div class="item mut" style="margin:6px 0 10px">⛔ delist bayrağı yandığı an bildirim · 🚨 depeg/OI alarmı anında cepte · 🕵️ günlük arkeoloji özeti</div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <span style="font-size:20px;color:var(--grn);font-weight:700">$20<span class="mut" style="font-size:12px">/ay</span></span>
-          <a id="probtn" href="#" onclick="return false" style="background:#1a2b20;border:1px solid var(--line2);color:var(--mut);border-radius:6px;padding:10px 22px;font-weight:700;letter-spacing:.06em;cursor:default">ÇOK YAKINDA</a>
-        </div>
-        <div class="item mut" style="margin-top:8px">// ödeme kartla, uluslararası güvenli altyapıyla alınır · abonelik istediğin an iptal edilir · bu bir bilgi servisidir, yatırım tavsiyesi değildir</div>
+    <div class="ttl">GALAXSI Pro — Üyelik</div>
+    <div class="item mut" style="margin-bottom:12px">// Site herkese açık, saatlik güncellenir. <b class="yel">Pro üyeler bayrağı yandığı SANİYE Telegram'dan alır</b> + sınırsız coin taraması + günlük özet.</div>
+    <div class="plans">
+      <div class="plan">
+        <div class="dur">7 Gün</div>
+        <div class="price">$20</div>
+        <ul><li>Tüm tehlike bayrakları</li><li>Anlık Telegram alarmı</li><li>Sınırsız coin taraması</li></ul>
+        <button class="sub" data-plan="7g" data-price="20">Abone Ol</button>
+      </div>
+      <div class="plan best">
+        <div class="badge">EN POPÜLER</div>
+        <div class="dur">30 Gün</div>
+        <div class="price">$100</div>
+        <ul><li>7 günün her şeyi</li><li>Günlük arkeoloji özeti</li><li>Öncelikli alarm</li></ul>
+        <button class="sub" data-plan="30g" data-price="100">Abone Ol</button>
+      </div>
+      <div class="plan">
+        <div class="badge" style="background:var(--yel);color:#3a2c00">%42 TASARRUF</div>
+        <div class="dur">1 Yıl</div>
+        <div class="old">$1200</div>
+        <div class="price">$699</div>
+        <div class="save">yıllık = ayda ~$58 · aylığa göre %42 ucuz</div>
+        <ul><li>30 günün her şeyi</li><li>Tüm yıl kesintisiz</li><li>Yeni özelliklere erken erişim</li></ul>
+        <button class="sub" data-plan="1y" data-price="699">Abone Ol</button>
       </div>
     </div>
+    <div class="item mut" style="margin-top:10px">// ödeme uluslararası güvenli altyapıyla alınır · abonelik istediğin an iptal edilir · bu bir bilgi/risk servisidir, yatırım tavsiyesi değildir</div>
   </section>
 
   <footer>
-    <b>Yasal uyarı:</b> GALAXSI bir risk-istihbarat aracıdır; <b>yatırım tavsiyesi değildir</b>, alım-satım önerisi vermez,
-    portföy yönetmez, SPK lisanslı danışmanlık hizmeti sunmaz. Bayraklar kamuya açık verilerin otomatik analizidir; kararlar ve sonuçları size aittir.
-    Sistem her saat kendini günceller. · <a href="/galaxsi/">eski panel</a>
+    <b>Yasal uyarı:</b> GALAXSI bir risk-istihbarat aracıdır; <b>yatırım tavsiyesi değildir</b>, alım-satım önerisi vermez, portföy yönetmez, SPK lisanslı danışmanlık hizmeti sunmaz. Bayraklar kamuya açık verilerin otomatik analizidir; kararlar ve sonuçları size aittir. Sistem her saat kendini günceller.
   </footer>
 </div>
 
+<div id="modal"><div class="mbox">
+  <button class="x" onclick="document.getElementById('modal').classList.remove('on')">×</button>
+  <h3 id="mtitle">GALAXSI Pro</h3>
+  <div class="item mut" id="mdesc">Abonelik</div>
+  <input id="memail" type="email" placeholder="e-posta adresin (alarm daveti buraya gelir)">
+  <button class="go" id="mgo">Ödemeye Geç</button>
+  <div class="item mut" style="margin-top:10px;font-size:11.5px">Ödeme sayfasına yönlendirileceksin. Ödeme sonrası özel Telegram alarm kanalının davet linki e-postana gelir.</div>
+</div></div>
+
 <script>
-/* ── kod yagmuru ── */
-(function(){
-  var c=document.getElementById('rain'); if(!c||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  var x=c.getContext('2d'),W,H,cols,drops,GL="01₿ΞĐ▚▞ΛΔΣ+·:XKZQ790アイウエオカキクケコサシスセソ";
-  function rs(){W=c.width=innerWidth;H=c.height=innerHeight;cols=Math.floor(W/16);drops=Array(cols).fill(0).map(function(){return Math.random()*-50});}
-  rs();addEventListener('resize',rs);
-  var last=0;
-  function tick(t){
-    if(t-last>50){last=t;
-      x.fillStyle="rgba(5,8,7,0.12)";x.fillRect(0,0,W,H);
-      x.font="14px monospace";
-      for(var i=0;i<cols;i++){
-        var ch=GL[Math.floor(Math.random()*GL.length)];
-        x.fillStyle=Math.random()<.06?"#8affc0":"#1f8f52";
-        x.fillText(ch,i*16,drops[i]*16);
-        if(drops[i]*16>H&&Math.random()>.975)drops[i]=0;
-        drops[i]++;
-      }
-    }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-})();
+/* kod yagmuru */
+(function(){var c=document.getElementById('rain');if(!c||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var x=c.getContext('2d'),W,H,cols,drops,GL="01₿ΞĐ▚▞ΛΔΣ+·:XKZQ790アイウエオカキクケコサシスセソ";
+function rs(){W=c.width=innerWidth;H=c.height=innerHeight;cols=Math.floor(W/16);drops=Array(cols).fill(0).map(function(){return Math.random()*-50})}
+rs();addEventListener('resize',rs);var last=0;
+function tick(t){if(t-last>50){last=t;x.fillStyle="rgba(5,8,7,0.12)";x.fillRect(0,0,W,H);x.font="14px monospace";
+for(var i=0;i<cols;i++){var ch=GL[Math.floor(Math.random()*GL.length)];x.fillStyle=Math.random()<.06?"#8affc0":"#1f8f52";x.fillText(ch,i*16,drops[i]*16);if(drops[i]*16>H&&Math.random()>.975)drops[i]=0;drops[i]++}}requestAnimationFrame(tick)}
+requestAnimationFrame(tick)})();
 
-/* ── boot ekrani ── */
-(function(){
-  var boot=document.getElementById('boot'),log=document.getElementById('bootlog');
-  if(sessionStorage.getItem('gx_boot')){boot.classList.add('done');return;}
-  var lines=[
-    "> GALAXSI guvenlik radari v2 baslatiliyor...",
-    "> kaynak dogrulama: Binance CMS ..... [OK]",
-    "> kaynak dogrulama: OKX / Gate / F&G  [OK]",
-    "> durustluk protokolu yuklendi ...... [AKTIF]",
-    "> kar-sinyali modulu ................ [YOK - kasitli]",
-    "> tehlike bayraklari yukleniyor _"
-  ];
-  var li=0,ci=0,out="";
-  (function type(){
-    if(li>=lines.length){setTimeout(function(){boot.classList.add('done');sessionStorage.setItem('gx_boot','1');},420);return;}
-    var l=lines[li];
-    if(ci<l.length){out+=l[ci++];log.innerHTML=out+'<span class="cursor"></span>';setTimeout(type,10);}
-    else{out+="\n";li++;ci=0;setTimeout(type,110);}
-  })();
-})();
+/* boot — GARANTİ kapanma: yazma + sabit 3.2sn fallback + atla + tıkla-geç */
+(function(){var boot=document.getElementById('boot'),log=document.getElementById('bootlog'),skip=document.getElementById('bootskip');
+function done(){boot.classList.add('done');try{sessionStorage.setItem('gx_boot','1')}catch(e){}}
+skip.addEventListener('click',done);boot.addEventListener('click',function(e){if(e.target===boot)done()});
+setTimeout(done,3200); /* ne olursa olsun 3.2sn sonra kapanır */
+if(sessionStorage.getItem('gx_boot')){done();return;}
+var lines=["> GALAXSI tehlike radari v2 baslatiliyor...","> kaynak: Binance / OKX / Gate / CoinGecko [OK]","> durustluk protokolu ................. [AKTIF]","> kar-sinyali modulu .................. [YOK - kasitli]","> coin risk tarayici .................. [HAZIR]","> tehlike bayraklari yukleniyor _"];
+var li=0,ci=0,out="";
+(function type(){if(li>=lines.length){setTimeout(done,350);return;}var l=lines[li];
+if(ci<l.length){out+=l[ci++];log.innerHTML=out+'<span class="cursor"></span>';setTimeout(type,9)}
+else{out+="\n";li++;ci=0;setTimeout(type,90)}})()})();
 
-/* ── canli veri ── */
 var q=function(id){return document.getElementById(id)};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(function(d){
-  var age=(Date.now()/1000-(d.updated||0))/60;
-  q('s-age').textContent=age<60?Math.round(age)+" dk":Math.round(age/60)+" sa";
-  if(age>150){q('fresh').innerHTML='<div class="warnbox">⚠ <b>BİLİNMİYOR — veri '+Math.round(age)+' dk eski.</b> Radar gecikmiş olabilir; uyarı-yok = güvenli VARSAYMA.</div>';}
-  var dl=d.delist||[],h='';
-  q('s-flags').textContent=dl.length;
-  for(var i=0;i<Math.min(dl.length,15);i++){var it=dl[i];
-    h+='<div class="item red">⛔ <b>'+esc(it.sym)+'</b> <span class="mut">—</span> '+esc(it.borsa)+' <span class="mut">· '+esc(it.tarih)+'</span></div>';}
-  if(dl.length>15)h+='<div class="item mut">+'+(dl.length-15)+' bayrak daha</div>';
-  q('delist').innerHTML=(h||'<div class="item mut">aktif bayrak yok</div>')+'<div class="item mut" style="margin-top:8px">// son 30 günün resmî delist duyuruları — borsanın kendi kararı, tahmin değil</div>';
-  var r='';
-  var dp=d.depeg||[],da=dp.filter(function(x){return x.alarm});
-  if(da.length){for(i=0;i<da.length;i++){r+='<div class="item red">🚨 <b>'+esc(da[i].sym)+'</b> DEPEG: '+da[i].fiyat+' ('+da[i].sapma_pct+'%)</div>';}}
-  else if(dp.length){r+='<div class="item grn">stablecoin peg ✓ <span class="mut">'+dp.map(function(x){return esc(x.sym)+' '+x.fiyat}).join(' · ')+'</span></div>';}
-  var fu=d.funding_uc||[];
-  if(fu.length){r+='<div class="item yel">aşırı funding <span class="mut">(kalabalık pozisyon)</span>: ';
-    for(i=0;i<Math.min(fu.length,6);i++){r+='<span class="chip"><b>'+esc(fu[i].sym)+'</b> '+fu[i].rate_pct+'%</span>';}r+='</div>';}
-  var oi=d.oi_cliff||[];
-  if(oi.length){r+='<div class="item red">📉 OI uçurumu <span class="mut">(büyük oyuncu kaçıyor olabilir)</span>: ';
-    for(i=0;i<oi.length;i++){r+='<span class="chip"><b>'+esc(oi[i].sym)+'</b> '+oi[i].chg_pct+'%/'+oi[i].dk+'dk</span>';}r+='</div>';}
-  var fg=d.fear_greed||{};
-  if(fg.value)r+='<div class="item cy">Fear &amp; Greed: '+fg.value+' <span class="mut">('+esc(fg.cls)+')</span></div>';
-  var kh=d.kaynak_hata||[];
-  if(kh.length)r+='<div class="item yel">⚠ kaynak erişilemedi: '+esc(kh.join(', '))+' — bu kaynaklar için durum <b>BİLİNMİYOR</b>.</div>';
-  q('risk').innerHTML=r||'<div class="item mut">aktif alarm yok</div>';
-}).catch(function(){q('fresh').innerHTML='<div class="warnbox">⚠ Veri yüklenemedi — durum BİLİNMİYOR.</div>';});
-/* ── coin risk taramasi ── */
+function fmtUsd(n){if(!n)return "-";return n>=1e9?'$'+(n/1e9).toFixed(2)+'B':n>=1e6?'$'+(n/1e6).toFixed(1)+'M':n>=1e3?'$'+(n/1e3).toFixed(0)+'K':'$'+n.toFixed(2)}
+function fmtNum(n){if(!n)return "-";return n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':Math.round(n)}
+function pct(n){if(n==null)return '<span class="mut">-</span>';var c=n>=0?'grn':'red',a=n>=0?'▲':'▼';return '<span class="'+c+'">'+a+' %'+Math.abs(n).toFixed(1)+'</span>'}
+function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19);var ay=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());return ay}
+
+/* ── KAPSAMLI COIN RISK RAPORU ── */
 (function(){
   var btn=q('cb'),inp=q('ci'),res=q('cres'),delistSyms=[];
   fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(function(d){delistSyms=(d.delist||[]).map(function(x){return x.sym})}).catch(function(){});
-  function fmt(n){return n>1e9?(n/1e9).toFixed(1)+'B':n>1e6?(n/1e6).toFixed(1)+'M':Math.round(n/1e3)+'K'}
-  function run(){
-    var t=(inp.value||'').trim();if(!t)return;
-    res.innerHTML='<div class="item mut">taranıyor: '+esc(t)+' …</div>';
-    fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(t))
-    .then(function(r){return r.json()}).then(function(s){
+  function run(){var t=(inp.value||'').trim();if(!t)return;
+    res.innerHTML='<div class="item mut">taranıyor: '+esc(t)+' … <span class="cursor"></span></div>';
+    fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(t)).then(function(r){return r.json()}).then(function(s){
       var c=(s.coins||[])[0];
-      if(!c){res.innerHTML='<div class="item yel">⚠ bulunamadı — sembolü/ismi kontrol et. Hiçbir listede olmaması başlı başına bir bayraktır.</div>';return;}
-      return fetch('https://api.coingecko.com/api/v3/coins/'+c.id+'?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=false')
-        .then(function(r){return r.json()}).then(function(d){render(d)});
-    }).catch(function(){res.innerHTML='<div class="item yel">⚠ kaynak meşgul/erişilemedi — 1 dk sonra tekrar dene. Şu an durum: BİLİNMİYOR.</div>';});
-  }
+      if(!c){res.innerHTML='<div class="verdict v-danger">⛔ BULUNAMADI — bu isim/sembol hiçbir listede yok</div><div class="item yel">Hiçbir büyük veri kaynağında kayıtlı olmaması <b>başlı başına ciddi bir tehlike bayrağıdır</b> — çok yeni, çok küçük ya da tamamen sahte olabilir. Sembolü doğru yazdığından emin ol.</div>';return}
+      return fetch('https://api.coingecko.com/api/v3/coins/'+c.id+'?localization=false&tickers=true&market_data=true&community_data=true&developer_data=true&sparkline=false').then(function(r){return r.json()}).then(render);
+    }).catch(function(){res.innerHTML='<div class="warnbox">⚠ Veri kaynağı şu an meşgul/erişilemedi. Durum: <b>BİLİNMİYOR</b> — 1 dakika sonra tekrar dene.</div>'});}
+
   function render(d){
-    var f=[],w=[],md=d.market_data||{},dev=d.developer_data||{};
-    var sym=(d.symbol||'').toUpperCase();
-    if(delistSyms.indexOf(sym)>=0)f.push('⛔ <b>RESMÎ DELIST BAYRAĞI</b> — bir borsa bu coini listeden çıkarıyor (radarımızda aktif)');
-    var rank=d.market_cap_rank;
-    if(!rank)f.push('🚨 piyasa sıralaması YOK — çok küçük ya da ölü olabilir');
-    else if(rank>1000)w.push('⚠ sıralama #'+rank+' — düşük likidite bölgesi');
-    var mc=(md.market_cap||{}).usd||0,vol=(md.total_volume||{}).usd||0;
-    if(mc>0&&vol/mc<0.005)w.push('⚠ hacim/piyasa-değeri oranı çok düşük — çıkmak istediğinde alıcı bulamayabilirsin');
-    var athc=(md.ath_change_percentage||{}).usd;
-    if(athc!=null&&athc<-90)w.push('⚠ tüm-zamanlar zirvesinden %'+Math.abs(Math.round(athc))+' düşmüş');
-    if(dev.commit_count_4_weeks===0)w.push('💀 GitHub deposu 4 haftadır tamamen sessiz — geliştirme durmuş olabilir');
-    var down=d.sentiment_votes_down_percentage;
-    if(down&&down>50)w.push('⚠ topluluk oyu %'+Math.round(down)+' negatif');
-    var h='<div class="item" style="font-size:14px"><b class="cy">'+esc(d.name)+' ('+esc(sym)+')</b> <span class="mut">· sıralama '+(rank?'#'+rank:'yok')+(mc?' · piyasa değeri $'+fmt(mc):'')+'</span></div>';
-    for(var i=0;i<f.length;i++)h+='<div class="item red">'+f[i]+'</div>';
-    for(i=0;i<w.length;i++)h+='<div class="item yel">'+w[i]+'</div>';
-    if(!f.length&&!w.length)h+='<div class="item grn">✓ bu taramada bayrak çıkmadı <span class="mut">— bu GÜVENLİ demek DEĞİLDİR; sadece kontrol listemizde alarm yok</span></div>';
-    h+='<div class="item mut" style="margin-top:6px">// karar ve sonuç sana aittir — biz sadece tuzağı işaret ederiz</div>';
+    var md=d.market_data||{},dev=d.developer_data||{},com=d.community_data||{};
+    var sym=(d.symbol||'').toUpperCase(),rank=d.market_cap_rank;
+    var price=(md.current_price||{}).usd,mc=(md.market_cap||{}).usd||0,vol=(md.total_volume||{}).usd||0;
+    var ch24=(md.price_change_percentage_24h),ch7=(md.price_change_percentage_7d),ch30=(md.price_change_percentage_30d),ch1y=(md.price_change_percentage_1y);
+    var athc=(md.ath_change_percentage||{}).usd,atl=(md.atl||{}).usd;
+    var circ=md.circulating_supply,maxs=md.max_supply,tot=md.total_supply;
+    var cat=(d.categories||[]).filter(Boolean)[0]||'-';
+    var yas=yasHesap(d.genesis_date);
+    var nEx=(d.tickers||[]).length;
+    var down=d.sentiment_votes_down_percentage,up=d.sentiment_votes_up_percentage;
+    var commits=dev.commit_count_4_weeks,stars=dev.stars;
+
+    /* bayraklar (agirlikli) */
+    var danger=[],warn=[],good=[];
+    if(delistSyms.indexOf(sym)>=0)danger.push('⛔ <b>RESMÎ DELIST BAYRAĞI</b> — bir borsa bu coini listeden çıkarıyor (radarımızda AKTİF). Bu tahmin değil, borsanın kararı.');
+    if(!rank)danger.push('⛔ Piyasa sıralaması YOK — pazar bu coini ciddiye almıyor; ölü ya da terk edilmiş olabilir');
+    if(athc!=null&&athc<=-95)danger.push('⛔ Zirvesinden <b>%'+Math.abs(Math.round(athc))+'</b> düşmüş — alanların neredeyse tamamı zararda, toparlanma çok zor');
+    else if(athc!=null&&athc<=-85)warn.push('⚠ Zirvesinden %'+Math.abs(Math.round(athc))+' düşmüş — geç kalan alıcılar ağır zararda');
+    if(commits===0)danger.push('💀 GitHub deposu <b>4 haftadır tamamen sessiz</b> — geliştirme durmuş, proje terk edilmiş olabilir');
+    else if(commits!=null&&commits<3&&commits>0)warn.push('⚠ GitHub aktivitesi çok düşük (4 haftada '+commits+' commit)');
+    if(rank&&rank>2000)danger.push('⛔ Sıralama #'+rank+' — çok derin, riskli bölge');
+    else if(rank&&rank>500)warn.push('⚠ Sıralama #'+rank+' — düşük likidite bölgesi, ani çöküşe açık');
+    if(mc>0&&vol/mc<0.01)warn.push('⚠ Günlük hacim / piyasa değeri oranı <b>çok düşük</b> (%'+(vol/mc*100).toFixed(1)+') — satmak istediğinde alıcı bulamayabilirsin (likidite tuzağı)');
+    if(down&&down>60)warn.push('⚠ Topluluk oyu <b>%'+Math.round(down)+' negatif</b> — kullanıcılar bu coine güvenmiyor');
+    if(maxs&&circ&&circ/maxs<0.35)warn.push('⚠ Arzın sadece %'+Math.round(circ/maxs*100)+'\'i dolaşımda — geri kalanı piyasaya girince <b>fiyat baskısı</b> (enflasyon riski)');
+    if(nEx&&nEx<3&&nEx>0)warn.push('⚠ Sadece '+nEx+' işlem çiftinde görülüyor — çok az borsada, çıkış zor olabilir');
+    if(yas!=null&&yas<6)warn.push('⚠ Proje çok yeni ('+yas+' aylık) — geçmişi kanıtlanmamış, en riskli dönem');
+    /* iyi sinyaller */
+    if(rank&&rank<=100)good.push('✅ İlk 100 arasında (#'+rank+') — köklü ve likit');
+    if(commits&&commits>=20)good.push('✅ GitHub aktif ('+commits+' commit/4hf) — geliştirme canlı');
+    if(nEx&&nEx>=20)good.push('✅ '+nEx+'+ işlem çiftinde listeli — geniş erişim, kolay çıkış');
+    if(up&&up>70)good.push('✅ Topluluk oyu %'+Math.round(up)+' pozitif');
+    if(athc!=null&&athc>-30&&rank&&rank<300)good.push('✅ Zirveye yakın seyrediyor (%'+Math.abs(Math.round(athc))+' altında)');
+
+    /* verdict */
+    var cls,vt;
+    if(danger.length){cls='v-danger';vt='⛔ TEHLİKE — '+danger.length+' ciddi bayrak yandı'}
+    else if(warn.length>=3){cls='v-high';vt='🔴 YÜKSEK RİSK — '+warn.length+' uyarı'}
+    else if(warn.length>=1){cls='v-mid';vt='🟡 ORTA RİSK — '+warn.length+' uyarı, dikkatli ol'}
+    else{cls='v-safe';vt='🟢 Belirgin tehlike bayrağı çıkmadı'}
+
+    var h='<div class="item" style="font-size:15px;margin-bottom:6px"><b class="cy">'+esc(d.name)+' ('+esc(sym)+')</b> <span class="mut">· '+esc(cat)+(rank?' · sıralama #'+rank:'')+'</span></div>';
+    h+='<div class="verdict '+cls+'">'+vt+'</div>';
+
+    if(danger.length||warn.length){h+='<div class="rsec"><div class="h">🚩 TEHLİKE BAYRAKLARI</div>';
+      for(var i=0;i<danger.length;i++)h+='<div class="rrow"><span class="v red" style="text-align:left;font-weight:400">'+danger[i]+'</span></div>';
+      for(i=0;i<warn.length;i++)h+='<div class="rrow"><span class="v yel" style="text-align:left;font-weight:400">'+warn[i]+'</span></div>';h+='</div>';}
+    if(good.length){h+='<div class="rsec"><div class="h">✅ OLUMLU SİNYALLER</div>';
+      for(i=0;i<good.length;i++)h+='<div class="rrow"><span class="v grn" style="text-align:left;font-weight:400">'+good[i]+'</span></div>';h+='</div>';}
+
+    h+='<div class="rsec"><div class="h">💵 FİYAT & HAREKET</div>'
+      +'<div class="rrow"><span class="k">Fiyat</span><span class="v">'+(price!=null?(price<0.01?'$'+price.toFixed(8):fmtUsd(price)):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">24 saat</span><span class="v">'+pct(ch24)+'</span></div>'
+      +'<div class="rrow"><span class="k">7 gün</span><span class="v">'+pct(ch7)+'</span></div>'
+      +'<div class="rrow"><span class="k">30 gün</span><span class="v">'+pct(ch30)+'</span></div>'
+      +'<div class="rrow"><span class="k">1 yıl</span><span class="v">'+pct(ch1y)+'</span></div>'
+      +'<div class="rrow"><span class="k">Zirveden (ATH)</span><span class="v '+(athc<-80?'red':athc<-40?'yel':'grn')+'">'+(athc!=null?'%'+Math.round(athc):'-')+'</span></div></div>';
+
+    h+='<div class="rsec"><div class="h">💧 BÜYÜKLÜK & LİKİDİTE</div>'
+      +'<div class="rrow"><span class="k">Piyasa değeri</span><span class="v">'+fmtUsd(mc)+'</span></div>'
+      +'<div class="rrow"><span class="k">24s hacim</span><span class="v">'+fmtUsd(vol)+'</span></div>'
+      +'<div class="rrow"><span class="k">Hacim/Değer oranı</span><span class="v '+(mc&&vol/mc<0.01?'yel':'grn')+'">'+(mc?'%'+(vol/mc*100).toFixed(1):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">İşlem çifti sayısı</span><span class="v">'+(nEx||'-')+'</span></div></div>';
+
+    h+='<div class="rsec"><div class="h">🪙 ARZ & YAŞ</div>'
+      +'<div class="rrow"><span class="k">Dolaşan arz</span><span class="v">'+fmtNum(circ)+' '+esc(sym)+'</span></div>'
+      +'<div class="rrow"><span class="k">Maksimum arz</span><span class="v">'+(maxs?fmtNum(maxs):'sınırsız/belirsiz')+'</span></div>'
+      +'<div class="rrow"><span class="k">Dolaşımda oran</span><span class="v">'+(maxs&&circ?'%'+Math.round(circ/maxs*100):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Proje yaşı</span><span class="v">'+(yas!=null?(yas>=12?(yas/12).toFixed(1)+' yıl':yas+' ay'):'-')+'</span></div></div>';
+
+    h+='<div class="rsec"><div class="h">👥 TOPLULUK & GELİŞTİRME</div>'
+      +'<div class="rrow"><span class="k">GitHub commit (4hf)</span><span class="v '+(commits===0?'red':commits>=20?'grn':'yel')+'">'+(commits!=null?commits:'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">GitHub yıldız</span><span class="v">'+(stars!=null?fmtNum(stars):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Topluluk güveni</span><span class="v">'+(up!=null?'%'+Math.round(up)+' olumlu':'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Twitter takipçi</span><span class="v">'+(com.twitter_followers?fmtNum(com.twitter_followers):'-')+'</span></div></div>';
+
+    h+='<div class="item mut" style="margin-top:8px">// Tüm veriler kamuya açık kaynaklardan (CoinGecko) canlı çekildi. <b class="yel">"Bayrak yok = güvenli" DEĞİLDİR</b> — sadece kontrol listemizde alarm yok demektir. Karar ve sonuç sana aittir; bu yatırım tavsiyesi değildir.</div>';
     res.innerHTML=h;
   }
   btn.addEventListener('click',run);
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')run()});
 })();
 
+/* ── abonelik modal ── */
+(function(){var modal=q('modal'),mt=q('mtitle'),mdesc=q('mdesc'),mgo=q('mgo'),cur=null;
+var names={'7g':'7 Günlük Pro','30g':'30 Günlük Pro','1y':'1 Yıllık Pro'};
+document.querySelectorAll('.sub').forEach(function(b){b.addEventListener('click',function(){
+  cur={plan:b.getAttribute('data-plan'),price:b.getAttribute('data-price')};
+  mt.textContent='GALAXSI Pro — '+names[cur.plan];
+  mdesc.innerHTML='<span class="grn">$'+cur.price+'</span> · anlık Telegram alarmı + sınırsız tarama';
+  modal.classList.add('on');});});
+mgo.addEventListener('click',function(){
+  var em=q('memail').value.trim();
+  if(!em||em.indexOf('@')<0){q('memail').style.borderColor='var(--red)';return;}
+  /* ödeme linki entegrasyonu: window.GX_PAY[plan] varsa oraya yönlendir */
+  var links=(window.GX_PAY||{});
+  if(links[cur.plan]){location.href=links[cur.plan]+(links[cur.plan].indexOf('?')<0?'?':'&')+'email='+encodeURIComponent(em);return;}
+  mdesc.innerHTML='<span class="yel">✅ Kaydın alındı! Ödeme kanalı aktifleşince '+esc(em)+' adresine davet gönderilecek.</span>';
+  q('memail').style.display='none';mgo.style.display='none';
+});})();
+
+/* ── canli veri ── */
+fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(function(d){
+  var age=(Date.now()/1000-(d.updated||0))/60;q('s-age').textContent=age<60?Math.round(age)+" dk":Math.round(age/60)+" sa";
+  if(age>150)q('fresh').innerHTML='<div class="warnbox">⚠ <b>BİLİNMİYOR — veri '+Math.round(age)+' dk eski.</b> Radar gecikmiş olabilir; uyarı-yok = güvenli VARSAYMA.</div>';
+  var dl=d.delist||[],h='';q('s-flags').textContent=dl.length;
+  for(var i=0;i<Math.min(dl.length,15);i++){var it=dl[i];h+='<div class="item red">⛔ <b>'+esc(it.sym)+'</b> <span class="mut">—</span> '+esc(it.borsa)+' <span class="mut">· '+esc(it.tarih)+'</span></div>';}
+  if(dl.length>15)h+='<div class="item mut">+'+(dl.length-15)+' bayrak daha</div>';
+  q('delist').innerHTML=(h||'<div class="item mut">aktif bayrak yok</div>')+'<div class="item mut" style="margin-top:8px">// son 30 günün resmî delist duyuruları — borsanın kararı, tahmin değil</div>';
+  var r='';var dp=d.depeg||[],da=dp.filter(function(x){return x.alarm});
+  if(da.length){for(i=0;i<da.length;i++)r+='<div class="item red">🚨 <b>'+esc(da[i].sym)+'</b> DEPEG: '+da[i].fiyat+' ('+da[i].sapma_pct+'%)</div>';}
+  else if(dp.length)r+='<div class="item grn">stablecoin peg ✓ <span class="mut">'+dp.map(function(x){return esc(x.sym)+' '+x.fiyat}).join(' · ')+'</span></div>';
+  var fu=d.funding_uc||[];if(fu.length){r+='<div class="item yel">aşırı funding <span class="mut">(kalabalık pozisyon)</span>: ';for(i=0;i<Math.min(fu.length,6);i++)r+='<span class="chip"><b>'+esc(fu[i].sym)+'</b> '+fu[i].rate_pct+'%</span>';r+='</div>';}
+  var oi=d.oi_cliff||[];if(oi.length){r+='<div class="item red">📉 OI uçurumu: ';for(i=0;i<oi.length;i++)r+='<span class="chip"><b>'+esc(oi[i].sym)+'</b> '+oi[i].chg_pct+'%/'+oi[i].dk+'dk</span>';r+='</div>';}
+  var fg=d.fear_greed||{};if(fg.value)r+='<div class="item cy">Fear &amp; Greed: '+fg.value+' <span class="mut">('+esc(fg.cls)+')</span></div>';
+  var kh=d.kaynak_hata||[];if(kh.length)r+='<div class="item yel">⚠ kaynak erişilemedi: '+esc(kh.join(', '))+' — durum <b>BİLİNMİYOR</b>.</div>';
+  q('risk').innerHTML=r||'<div class="item mut">aktif alarm yok</div>';
+}).catch(function(){q('fresh').innerHTML='<div class="warnbox">⚠ Veri yüklenemedi — durum BİLİNMİYOR.</div>'});
 fetch('./data/arkeoloji.json').then(function(r){return r.json()}).then(function(a){
-  var h='',i;
-  var sz=a.sizinti||[],szs=sz.filter(function(x){return x.supheli});
+  var h='',i;var sz=a.sizinti||[],szs=sz.filter(function(x){return x.supheli});
   if(sz.length){h+='<div class="item">delist öncesi inceleme: '+sz.length+' coin ölçüldü → <b class="red">'+szs.length+' şüpheli</b> <span class="mut">(duyurudan ÖNCE anormal satış/hacim)</span></div>';
     for(i=0;i<Math.min(szs.length,6);i++){var s=szs[i];h+='<div class="item red">🕵️ <b>'+esc(s.sym)+'</b>: duyuru öncesi 48s '+s.pre48_ret_pct+'% <span class="mut">·</span> hacim ×'+s.hacim_orani+'</div>';}}
-  var lt=a.listing_tuzagi||{};
-  if(lt.n){h+='<div class="item mut">yeni-listing tuzağı: '+lt.n+' listing — ilk 48s medyan <b class="yel">'+lt.medyan_pct+'%</b>, negatif oranı <b class="yel">'+lt.negatif_pct+'%</b></div>';}
-  var gh=a.github||[],gd=gh.filter(function(x){return x.olu});
-  if(gd.length){h+='<div class="item yel">💀 ölü proje (6+ ay commit yok): '+gd.map(function(x){return '<b>'+esc(x.sym)+'</b> ('+x.ay_once+' ay)'}).join(', ')+'</div>';}
+  var lt=a.listing_tuzagi||{};if(lt.n)h+='<div class="item mut">yeni-listing tuzağı: '+lt.n+' listing — ilk 48s medyan <b class="yel">'+lt.medyan_pct+'%</b>, negatif oranı <b class="yel">'+lt.negatif_pct+'%</b></div>';
+  var gh=a.github||[],gd=gh.filter(function(x){return x.olu});if(gd.length)h+='<div class="item yel">💀 ölü proje (6+ ay commit yok): '+gd.map(function(x){return '<b>'+esc(x.sym)+'</b> ('+x.ay_once+' ay)'}).join(', ')+'</div>';
   if(h)q('ark').innerHTML=h;
 }).catch(function(){});
 </script>
