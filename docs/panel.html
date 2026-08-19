@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>GALAXSI · Özel Panel</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#050807">
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#050807;color:#c9e8d4;font:14px/1.55 system-ui,Segoe UI,Roboto,sans-serif;padding:12px 10px 60px}
+.w{max-width:1000px;margin:0 auto}
+a{color:#5ce1e6;text-decoration:none}
+h1{font-size:20px;color:#eafff2}
+.warn{background:#2a1005;border:1px solid #5c3a1e;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:12.5px;color:#ffd9a8;line-height:1.6}
+.warn b{color:#ffb454}
+.meta{font-size:12px;color:#5f8a70;margin:6px 0 12px}
+.meta .stale{color:#ff7676}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.tab{background:#0a100d;border:1px solid #123822;border-radius:8px;padding:8px 12px;cursor:pointer;color:#9fc7ac;font-weight:600;font-size:13px}
+.tab.on{background:#39ff88;color:#04140b;border-color:#39ff88}
+.card{border:1px solid #123822;background:#0a100d;border-radius:10px;padding:12px 14px;margin:9px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sym{font-weight:700;color:#eafff2;font-size:15px}
+.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.long{background:#0c3;color:#04140b}.short{background:#f43f5e;color:#fff}.wait{background:#1a2130;color:#9fb}
+.grn{color:#39ff88}.red{color:#ff6b6b}.yel{color:#ffcf5c}.mut{color:#5f8a70}
+.kv{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:8px;font-size:12.5px}
+.kv span b{color:#eafff2;font-weight:600}
+.reasons{margin-top:8px;font-size:12px;color:#9fc7ac;line-height:1.6}
+.reasons div{padding:2px 0;border-top:1px dashed #123822}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid #101d15;white-space:nowrap}
+th{color:#5f8a70;font-weight:600;text-align:right;position:sticky;top:0;background:#050807}
+td:first-child,th:first-child{text-align:left}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#gate{max-width:360px;margin:60px auto;text-align:center}
+#gate input{width:100%;background:#050807;border:1px solid #1e5c37;border-radius:8px;padding:12px;color:#39ff88;font:inherit;font-size:16px;text-align:center;margin:12px 0}
+#gate button{width:100%;background:#39ff88;color:#04140b;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
+.hide{display:none!important}
+.empty{text-align:center;color:#5f8a70;padding:40px 10px}
+.refresh{font-size:12px;color:#5f8a70;cursor:pointer;border:1px solid #123822;border-radius:6px;padding:4px 10px;background:#0a100d}
+</style></head><body>
+
+<div id="gate">
+  <h1>🔒 GALAXSI Özel Panel</h1>
+  <p class="mut" style="margin-top:8px;font-size:13px">Bu panel sadece sana özeldir. Kodunu gir:</p>
+  <input id="gk" type="password" placeholder="panel kodu" autocomplete="off">
+  <button onclick="saveKey()">Aç</button>
+  <p id="gerr" class="red hide" style="margin-top:10px;font-size:13px">Kod hatalı.</p>
+</div>
+
+<div id="app" class="w hide">
+  <div class="row">
+    <h1>🛰️ GALAXSI Özel Panel</h1>
+    <span class="refresh" onclick="load(true)">↻ Yenile</span>
+  </div>
+  <div class="warn">
+    <b>⚠️ SADECE SENİN GÖZÜN İÇİN.</b> Bu bir <b>takip/istihbarat</b> panelidir — <b>yatırım tavsiyesi DEĞİLDİR</b>. Bu sinyallerin kanıtlanmış bir edge'i yoktur (test: 704 sinyal −%0.29, canlı $238→0). Buna bakıp <b>gerçek para basma</b> — merak/gözlem içindir.
+  </div>
+  <div id="meta" class="meta"></div>
+  <div class="tabs">
+    <div class="tab on" data-t="mega" onclick="tab('mega')">🎯 MEGA Sinyaller</div>
+    <div class="tab" data-t="gainers" onclick="tab('gainers')">🚀 Top Yükselen</div>
+    <div class="tab" data-t="pumps" onclick="tab('pumps')">💥 Pump Avcısı</div>
+    <div class="tab" data-t="watchlist" onclick="tab('watchlist')">👁️ İzleme Listesi</div>
+  </div>
+  <div id="pane"></div>
+</div>
+
+<script>
+const WK='https://galaxsi-stats.a4techmazlum.workers.dev';
+let KEY=localStorage.getItem('gx_owner_key')||'';
+let DATA=null, TAB='mega';
+
+function saveKey(){
+  const v=document.getElementById('gk').value.trim();
+  if(!v)return;
+  KEY=v; localStorage.setItem('gx_owner_key',v);
+  document.getElementById('gerr').classList.add('hide');
+  load(true);
+}
+function showGate(err){
+  document.getElementById('app').classList.add('hide');
+  document.getElementById('gate').classList.remove('hide');
+  if(err)document.getElementById('gerr').classList.remove('hide');
+}
+function showApp(){
+  document.getElementById('gate').classList.add('hide');
+  document.getElementById('app').classList.remove('hide');
+}
+function n(x,d){ if(x===null||x===undefined||isNaN(x))return '—'; return Number(x).toFixed(d===undefined?2:d); }
+function fmtPrice(p){ if(p===null||p===undefined)return '—'; p=Number(p); return p>=1?p.toFixed(3):p.toPrecision(4); }
+function sgn(x){ x=Number(x)||0; return (x>0?'+':'')+x.toFixed(2); }
+function cls(x){ return (Number(x)||0)>=0?'grn':'red'; }
+function shortSym(s){ return (s||'').replace('-USDT','').replace('-USD',''); }
+
+async function load(force){
+  if(!KEY){ showGate(false); return; }
+  try{
+    const r=await fetch(WK+'/panel?key='+encodeURIComponent(KEY),{cache:'no-store'});
+    if(r.status===403){ localStorage.removeItem('gx_owner_key'); KEY=''; showGate(true); return; }
+    const d=await r.json();
+    if(d.err){ showGate(true); return; }
+    showApp();
+    if(d.empty){ document.getElementById('meta').textContent=''; document.getElementById('pane').innerHTML='<div class="empty">Henüz veri gelmedi (sunucu 3 dk\'da bir gönderir).</div>'; return; }
+    DATA=d; renderMeta(); render();
+  }catch(e){ document.getElementById('pane').innerHTML='<div class="empty">Bağlantı hatası: '+e+'</div>'; }
+}
+function renderMeta(){
+  const ts=DATA.ts?DATA.ts*1000:0;
+  const age=ts?Math.round((Date.now()-ts)/60000):null;
+  let s='Son güncelleme: ';
+  if(age===null)s+='—';
+  else if(age<1)s+='az önce';
+  else s+=age+' dk önce';
+  const stale=age!==null&&age>10;
+  document.getElementById('meta').innerHTML=(stale?'<span class="stale">⚠ ':'<span>')+s+(stale?' (pusher durmuş olabilir)':'')+'</span>';
+}
+function tab(t){ TAB=t; document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.dataset.t===t)); render(); }
+
+function render(){
+  if(!DATA)return;
+  const p=document.getElementById('pane');
+  if(TAB==='mega')p.innerHTML=renderMega();
+  else if(TAB==='gainers')p.innerHTML=renderGainers();
+  else if(TAB==='pumps')p.innerHTML=renderPumps();
+  else if(TAB==='watchlist')p.innerHTML=renderWatch();
+}
+
+function renderMega(){
+  const arr=((DATA.mega||{}).signals)||[];
+  if(!arr.length)return '<div class="empty">MEGA sinyal yok.</div>';
+  return arr.map(s=>{
+    const dir=(s.direction||'WAIT').toUpperCase();
+    const dc=dir==='LONG'?'long':dir==='SHORT'?'short':'wait';
+    const reasons=(s.reasons||[]).map(r=>'<div>• '+String(r).replace(/</g,'&lt;')+'</div>').join('');
+    return '<div class="card"><div class="row"><span class="sym">'+shortSym(s.sym)+'</span>'
+      +'<span class="pill '+dc+'">'+dir+(s.mega_score?' · '+n(s.mega_score,0):'')+'</span></div>'
+      +'<div class="kv">'
+      +'<span>Fiyat <b>'+fmtPrice(s.price)+'</b></span>'
+      +'<span>24s <b class="'+cls(s.change_24h)+'">'+sgn(s.change_24h)+'%</b></span>'
+      +'<span>RSI <b>'+n(s.rsi,0)+'</b></span>'
+      +'<span>Funding <b>'+n(s.funding*100,3)+'%</b></span>'
+      +'<span>LSR <b>'+n(s.lsr,2)+'</b></span>'
+      +'<span>Vol×<b>'+n(s.vol_ratio,2)+'</b></span>'
+      +'<span>ATR <b>'+n(s.atr_pct,2)+'%</b></span>'
+      +'</div>'+(reasons?'<div class="reasons">'+reasons+'</div>':'')+'</div>';
+  }).join('');
+}
+function renderGainers(){
+  const arr=((DATA.gainers||{}).gainers)||[];
+  if(!arr.length)return '<div class="empty">Veri yok.</div>';
+  let h='<div class="scroll"><table><thead><tr><th>Coin</th><th>24s%</th><th>Fiyat</th><th>TF</th><th>RSI</th><th>Mom</th><th>TP1%</th><th>TP2%</th><th>TP3%</th><th>SL%</th><th>Hacim</th></tr></thead><tbody>';
+  h+=arr.map(g=>'<tr><td class="sym">'+shortSym(g.sym)+'</td>'
+    +'<td class="'+cls(g.change_24h)+'">'+sgn(g.change_24h)+'</td>'
+    +'<td>'+fmtPrice(g.price)+'</td>'
+    +'<td class="mut">'+(g.tf_used||'—')+'</td>'
+    +'<td>'+n(g.rsi_1h,0)+'</td>'
+    +'<td>'+n(g.momentum_5bar,2)+'</td>'
+    +'<td class="grn">'+n(g.tp1_pct,1)+'</td>'
+    +'<td class="grn">'+n(g.tp2_pct,1)+'</td>'
+    +'<td class="grn">'+n(g.tp3_pct,1)+'</td>'
+    +'<td class="red">'+n(g.sl_pct,1)+'</td>'
+    +'<td class="mut">'+(g.volume_usdt?('$'+(g.volume_usdt/1e6).toFixed(1)+'M'):'—')+'</td></tr>').join('');
+  h+='</tbody></table></div>';
+  return h;
+}
+function renderPumps(){
+  const o=DATA.pumps||{}; const arr=(o.pumps)||[];
+  if(!arr.length)return '<div class="empty">Pump adayı yok.</div>';
+  const top=arr.slice().sort((a,b)=>(b.pump_score||0)-(a.pump_score||0)).slice(0,40);
+  let h='<div class="meta">'+arr.length+' aday · en güçlü 40 gösteriliyor</div><div class="scroll"><table><thead><tr><th>Coin</th><th>Skor</th><th>Karar</th><th>24s%</th><th>1s%</th><th>15d%</th><th>Giriş</th><th>Hedef</th><th>Stop</th><th>R/R</th><th>Akıllı Para</th></tr></thead><tbody>';
+  h+=top.map(g=>'<tr><td class="sym">'+shortSym(g.sym)+'</td>'
+    +'<td class="yel">'+n(g.pump_score,0)+'</td>'
+    +'<td class="mut" style="text-align:left">'+(g.verdict||'—')+'</td>'
+    +'<td class="'+cls(g.chg_24h)+'">'+sgn(g.chg_24h)+'</td>'
+    +'<td class="'+cls(g.chg_1h)+'">'+sgn(g.chg_1h)+'</td>'
+    +'<td class="'+cls(g.chg_15m)+'">'+sgn(g.chg_15m)+'</td>'
+    +'<td>'+fmtPrice(g.entry)+'</td>'
+    +'<td class="grn">'+fmtPrice(g.target)+'</td>'
+    +'<td class="red">'+fmtPrice(g.stop)+'</td>'
+    +'<td>'+n(g.rr,2)+'</td>'
+    +'<td class="mut">'+(g.smart_money||'—')+'</td></tr>').join('');
+  h+='</tbody></table></div>';
+  return h;
+}
+function renderWatch(){
+  const arr=((DATA.watchlist||{}).watchlist)||[];
+  if(!arr.length)return '<div class="empty">İzleme listesi boş.</div>';
+  const top=arr.slice().sort((a,b)=>(b.quality||0)-(a.quality||0)).slice(0,60);
+  let h='<div class="meta">'+arr.length+' kayıt · en yüksek kaliteli 60</div><div class="scroll"><table><thead><tr><th>Coin</th><th>Yön</th><th>TF</th><th>Kalite</th><th>Hareket%</th><th>Vol×</th><th>Fiyat</th><th>Tier</th></tr></thead><tbody>';
+  h+=top.map(w=>'<tr><td class="sym">'+shortSym(w.sym)+'</td>'
+    +'<td class="'+(String(w.side).toUpperCase()==='LONG'?'grn':'red')+'">'+(w.side||'—')+'</td>'
+    +'<td class="mut">'+(w.tf||'—')+'</td>'
+    +'<td class="yel">'+n(w.quality,1)+'</td>'
+    +'<td class="'+cls(w.move_pct)+'">'+sgn(w.move_pct)+'</td>'
+    +'<td>'+n(w.vol_ratio,2)+'</td>'
+    +'<td>'+fmtPrice(w.price)+'</td>'
+    +'<td class="mut">'+(w.tier||'—')+'</td></tr>').join('');
+  h+='</tbody></table></div>';
+  return h;
+}
+
+// başlat
+if(KEY){ load(true); } else { showGate(false); }
+setInterval(()=>{ if(KEY&&!document.getElementById('app').classList.contains('hide')) load(false); }, 60000);
+document.getElementById('gk').addEventListener('keydown',e=>{ if(e.key==='Enter')saveKey(); });
+</script>
+</body></html>
