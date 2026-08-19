@@ -439,7 +439,7 @@ mgo.addEventListener('click',function(){
 })();
 
 /* ── topluluk linkleri (Telegram odaları — linkler gelince aktifleşir) ── */
-window.GX_COMMUNITY={forum:'',duyuru:'',pro:''};
+window.GX_COMMUNITY={forum:'',duyuru:'https://t.me/eva_trade_alerts_bot',pro:''};
 (function(){var m={forum:['cbForum','💬 Foruma Gir'],duyuru:['cbDuyuru','📢 Kanala Katıl'],pro:['cbPro','🔒 Özel Odaya Gir']};
 Object.keys(m).forEach(function(k){var el=q(m[k][0]),u=(window.GX_COMMUNITY||{})[k];
 if(el&&u){el.href=u;el.textContent=m[k][1];el.style.opacity='1';el.style.pointerEvents='auto';el.target='_blank';}});})();
