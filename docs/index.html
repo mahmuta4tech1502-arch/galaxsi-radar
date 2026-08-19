@@ -18,6 +18,15 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#050807">
 <style>
+#gtbar{position:fixed;top:8px;right:10px;z-index:30;background:rgba(10,16,13,.94);border:1px solid #1e5c37;border-radius:8px;padding:5px 9px;display:flex;align-items:center;gap:6px}
+#gtbar .g{color:#39ff88;font-size:14px}
+.goog-te-banner-frame,.goog-te-balloon-frame,#goog-gt-tt,.goog-tooltip{display:none!important}
+body{top:0!important}
+.goog-te-gadget{font-size:0!important;line-height:0!important}
+.goog-te-gadget .goog-te-combo{color:#111!important;background:#fff;border:0;border-radius:6px;padding:5px 8px;font:13px sans-serif;max-width:160px;cursor:pointer}
+.goog-te-gadget-icon{display:none!important}
+</style>
+<style>
   :root{
     --bg:#050807; --panel:#0a100d; --line:#123822; --line2:#1e5c37;
     --grn:#39ff88; --grn-dim:#1f8f52; --red:#ff4d5e; --yel:#ffd166; --cyan:#5ce1e6; --org:#ff9f43;
@@ -124,6 +133,9 @@
 </style>
 </head>
 <body>
+<div id="gtbar"><span class="g">🌐</span><div id="google_translate_element"></div></div>
+<script>function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'tr',autoDisplay:false},'google_translate_element');}</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <canvas id="rain"></canvas>
 <div class="vignette"></div>
 
