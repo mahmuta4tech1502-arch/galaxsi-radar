@@ -381,7 +381,7 @@ mgo.addEventListener('click',function(){
   var inp=q('pcode'),btn=q('pcgo'),msg=q('pcmsg'),state=q('prostate');
   function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
   function showActive(tip){
-    state.innerHTML='<div class="verdict v-safe" style="font-size:14px">✅ <b>GALAXSI Pro AKTİF</b> — '+esc(tip)+' üyeliği · sınırsız erişim</div>';
+    state.innerHTML='<div class="verdict v-safe" style="font-size:14px">✅ <b>GALAXSI Pro AKTİF</b> — '+esc(tip)+' üyeliği<br><a href="/pro.html" style="display:inline-block;margin-top:10px;background:var(--grn);color:#04140b;padding:10px 22px;border-radius:6px;font-weight:700;text-decoration:none;letter-spacing:.05em">🚀 PRO PANELE GİT →</a></div>';
     document.querySelectorAll('.plan .sub').forEach(function(b){b.textContent='✓ Zaten Pro';b.style.opacity='.55';b.disabled=true});
   }
   var saved=null;try{saved=JSON.parse(localStorage.getItem('gx_pro')||'null')}catch(e){}
@@ -391,7 +391,8 @@ mgo.addEventListener('click',function(){
     msg.textContent='kontrol ediliyor…';
     sha(code).then(function(hx){var m=HASHES[hx];
       if(m){try{localStorage.setItem('gx_pro',JSON.stringify({tip:m,ts:Date.now()}))}catch(e){}
-        msg.innerHTML='<span class="grn">✓ Kod geçerli — Pro açıldı!</span>';showActive(m);state.scrollIntoView({behavior:'smooth'});}
+        msg.innerHTML='<span class="grn">✓ Kod geçerli — Pro Panele yönlendiriliyorsun…</span>';showActive(m);
+        setTimeout(function(){location.href='/pro.html';},900);}
       else{msg.innerHTML='<span class="red">✗ Geçersiz kod.</span> Doğru yazdığından emin ol.';}
     }).catch(function(){msg.innerHTML='<span class="yel">Tarayıcı kod doğrulamayı desteklemiyor (güvenli bağlantı gerekli).</span>'});
   }

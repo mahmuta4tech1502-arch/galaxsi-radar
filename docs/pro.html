@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<title>GALAXSI Pro Panel</title>
+<style>
+  :root{--bg:#050807;--panel:#0a100d;--line:#123822;--line2:#1e5c37;--grn:#39ff88;--grn-dim:#1f8f52;--red:#ff4d5e;--yel:#ffd166;--cyan:#5ce1e6;--org:#ff9f43;--txt:#c9e8d4;--mut:#5f8a70}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font:14px/1.6 "Cascadia Code","JetBrains Mono",Consolas,monospace;padding:18px 14px 60px}
+  ::selection{background:var(--grn);color:#000}
+  .wrap{max-width:900px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .top .l{font-size:20px;font-weight:700;color:var(--grn);letter-spacing:.1em;text-shadow:0 0 14px rgba(57,255,136,.4)}
+  .badge{background:rgba(57,255,136,.1);border:1px solid var(--line2);color:var(--grn);border-radius:20px;padding:4px 14px;font-size:11.5px}
+  a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+  .ttl{color:var(--grn);font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:26px 0 10px}
+  .ttl::before{content:"▚ ";color:var(--grn-dim)}
+  .panel{border:1px solid var(--line);background:rgba(10,16,13,.9);border-radius:8px;margin:10px 0;overflow:hidden}
+  .phead{padding:9px 14px;border-bottom:1px solid var(--line);background:rgba(18,56,34,.25);font-size:12.5px;color:var(--grn)}
+  .pbody{padding:14px 16px}
+  textarea,input{width:100%;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none}
+  textarea{min-height:64px;resize:vertical}
+  button{background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:11px 22px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.05em;margin-top:8px}
+  .item{font-size:12.8px;margin:3px 0}
+  .red{color:var(--red)}.yel{color:var(--yel)}.grn{color:var(--grn)}.mut{color:var(--mut)}.cy{color:var(--cyan)}.org{color:var(--org)}
+  table{width:100%;border-collapse:collapse;font-size:12.6px;margin-top:6px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid rgba(18,56,34,.5)}
+  th{color:var(--mut);font-weight:400;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  .lvl{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:700}
+  .lvl-d{background:rgba(255,77,94,.15);color:var(--red)}
+  .lvl-h{background:rgba(255,159,67,.15);color:var(--org)}
+  .lvl-m{background:rgba(255,209,102,.13);color:var(--yel)}
+  .lvl-s{background:rgba(57,255,136,.13);color:var(--grn)}
+  .chip{display:inline-block;margin:2px 6px 2px 0}
+  #lock{max-width:460px;margin:80px auto;text-align:center}
+  #lock .k{font-size:44px}
+  footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;font-size:11px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div id="lock" style="display:none">
+  <div class="k">🔒</div>
+  <h2 style="color:var(--grn);margin:12px 0">GALAXSI Pro — Üyelere Özel</h2>
+  <p class="item mut">Bu panel Pro üyelere özeldir. Kodun varsa ana sayfadan "Üyelik Kodu" kutusuna gir; yoksa abone ol.</p>
+  <p style="margin-top:16px"><a href="/">← Ana sayfaya dön / abone ol</a></p>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <div class="top">
+    <div class="l">GALAXSI <span style="color:var(--txt);font-size:13px">Pro Panel</span></div>
+    <div><span class="badge" id="ubadge">✅ Pro Aktif</span> · <a href="/">← ana sayfa</a> · <a href="#" id="cikis">çıkış</a></div>
+  </div>
+
+  <!-- PORTFÖY TARAYICI -->
+  <div class="ttl">🎯 Portföy Tarayıcı — hepsini bir arada tara</div>
+  <div class="panel"><div class="phead">Elindeki/izlediğin coinleri yaz (virgül veya alt alta) → tek seferde risk raporu</div>
+  <div class="pbody">
+    <textarea id="port" placeholder="BTC, ETH, XRP, PEPE, DOGE, SHIB, ACX ..."></textarea>
+    <button id="portgo">TÜMÜNÜ TARA</button>
+    <div id="portres" style="margin-top:12px"></div>
+  </div></div>
+
+  <!-- TEHLİKE SIRALAMASI -->
+  <div class="ttl">🏆 Bugünün Tehlike Sıralaması — resmî delist bayrakları</div>
+  <div class="panel"><div class="pbody" id="danger"><div class="item mut">yükleniyor…</div></div></div>
+
+  <!-- TAM RADAR -->
+  <div class="ttl">📡 Tam Radar — depeg / funding / OI / arkeoloji</div>
+  <div class="panel"><div class="pbody" id="radar"><div class="item mut">yükleniyor…</div></div></div>
+
+  <!-- TELEGRAM ALARM -->
+  <div class="ttl">🔔 Anlık Alarm (Telegram)</div>
+  <div class="panel"><div class="pbody">
+    <div class="item">Bayrak yandığı SANİYE cebine bildirim. <span class="yel">Kurulum tamamlanıyor</span> — hazır olunca bu panelden özel kanala katılırsın.</div>
+  </div></div>
+
+  <footer>GALAXSI Pro · risk-istihbarat aracı, yatırım tavsiyesi değildir. Veriler kamuya açık kaynaklardan canlı çekilir. Kararlar sana aittir.</footer>
+</div>
+
+<script>
+var q=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fmtUsd(n){if(!n)return "-";return n>=1e9?'$'+(n/1e9).toFixed(2)+'B':n>=1e6?'$'+(n/1e6).toFixed(1)+'M':n>=1e3?'$'+(n/1e3).toFixed(0)+'K':'$'+Number(n).toFixed(4)}
+function pct(n){if(n==null)return '<span class="mut">-</span>';var c=n>=0?'grn':'red';return '<span class="'+c+'">'+(n>=0?'▲':'▼')+'%'+Math.abs(n).toFixed(1)+'</span>'}
+
+/* KAPI: kod yoksa kilitli */
+var pro=null;try{pro=JSON.parse(localStorage.getItem('gx_pro')||'null')}catch(e){}
+if(!pro||!pro.tip){q('lock').style.display='block';}
+else{
+  q('app').style.display='block';
+  q('ubadge').textContent='✅ '+esc(pro.tip)+' — Pro Aktif';
+  q('cikis').addEventListener('click',function(e){e.preventDefault();localStorage.removeItem('gx_pro');location.href='/';});
+  boot();
+}
+
+var DELIST=[];
+function boot(){
+  /* delist listesi (tehlike sıralaması + portföy eşleştirme) */
+  fetch('/data/haber_radar.json').then(function(r){return r.json()}).then(function(d){
+    DELIST=(d.delist||[]).map(function(x){return (x.sym||'').toUpperCase()});
+    renderDanger(d);renderRadar(d);
+  }).catch(function(){q('danger').innerHTML='<div class="item yel">veri alınamadı — BİLİNMİYOR</div>'});
+  fetch('/data/arkeoloji.json').then(function(r){return r.json()}).then(renderArk).catch(function(){});
+}
+
+function riskLevel(c){
+  var f=0,d=0;var sym=(c.symbol||'').toUpperCase();
+  if(DELIST.indexOf(sym)>=0)d++;
+  if(!c.market_cap_rank)d++;
+  if(c.ath_change_percentage!=null&&c.ath_change_percentage<=-95)d++;
+  else if(c.ath_change_percentage!=null&&c.ath_change_percentage<=-85)f++;
+  if(c.market_cap_rank&&c.market_cap_rank>2000)d++;
+  else if(c.market_cap_rank&&c.market_cap_rank>500)f++;
+  if(c.total_volume&&c.market_cap&&c.total_volume/c.market_cap<0.01)f++;
+  if(d>0)return {k:'d',t:'⛔ TEHLİKE',n:d+f};
+  if(f>=3)return {k:'h',t:'🔴 YÜKSEK',n:f};
+  if(f>=1)return {k:'m',t:'🟡 ORTA',n:f};
+  return {k:'s',t:'🟢 TEMİZ',n:0};
+}
+
+/* PORTFÖY TARAYICI — tek istekte /coins/markets ile toplu */
+var LIST=null;
+function loadList(){if(LIST)return Promise.resolve(LIST);
+  return fetch('https://api.coingecko.com/api/v3/coins/list').then(function(r){return r.json()}).then(function(a){
+    LIST={};a.forEach(function(c){var s=(c.symbol||'').toUpperCase();if(!LIST[s])LIST[s]=c.id});return LIST;});}
+q('portgo').addEventListener('click',function(){
+  var raw=(q('port').value||'').toUpperCase().split(/[\s,;\n]+/).filter(Boolean);
+  var syms=[];raw.forEach(function(s){if(syms.indexOf(s)<0&&syms.length<15)syms.push(s)});
+  if(!syms.length)return;
+  q('portres').innerHTML='<div class="item mut">taranıyor: '+syms.length+' coin …</div>';
+  loadList().then(function(map){
+    var ids=syms.map(function(s){return map[s]}).filter(Boolean);
+    if(!ids.length){q('portres').innerHTML='<div class="item yel">coin bulunamadı — sembolleri kontrol et</div>';return;}
+    return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&price_change_percentage=24h,7d,30d').then(function(r){return r.json()}).then(function(rows){
+      rows.sort(function(a,b){var oa={d:0,h:1,m:2,s:3}[riskLevel(a).k],ob={d:0,h:1,m:2,s:3}[riskLevel(b).k];return oa-ob;});
+      var danger=0,h='<table><tr><th>Coin</th><th>Risk</th><th>Fiyat</th><th>24s</th><th>7g</th><th>Zirveden</th></tr>';
+      rows.forEach(function(c){var lv=riskLevel(c);if(lv.k==='d')danger++;
+        h+='<tr><td><b>'+esc((c.symbol||'').toUpperCase())+'</b> <span class="mut">#'+(c.market_cap_rank||'-')+'</span></td>'
+          +'<td><span class="lvl lvl-'+lv.k+'">'+lv.t+'</span></td>'
+          +'<td>'+fmtUsd(c.current_price)+'</td>'
+          +'<td>'+pct(c.price_change_percentage_24h_in_currency)+'</td>'
+          +'<td>'+pct(c.price_change_percentage_7d_in_currency)+'</td>'
+          +'<td class="'+(c.ath_change_percentage<-80?'red':c.ath_change_percentage<-40?'yel':'grn')+'">%'+Math.round(c.ath_change_percentage||0)+'</td></tr>';});
+      h+='</table>';
+      var eksik=syms.filter(function(s){return !map[s]});
+      var head='<div class="item" style="font-size:13px;margin-bottom:6px"><b>'+rows.length+' coin tarandı</b>'+(danger?' · <span class="red">'+danger+' TEHLİKE</span>':' · <span class="grn">delist bayrağı yok</span>')+'</div>';
+      if(eksik.length)head+='<div class="item yel">⚠ bulunamadı: '+eksik.join(', ')+' (sembolü kontrol et)</div>';
+      q('portres').innerHTML=head+h+'<div class="item mut" style="margin-top:6px">// "TEMİZ" = tuzak yok demek, "AL" demek DEĞİL · yatırım tavsiyesi değildir</div>';
+    });
+  }).catch(function(){q('portres').innerHTML='<div class="item yel">Kaynak meşgul (çok hızlı sorgu). 1 dk sonra tekrar dene — durum BİLİNMİYOR.</div>'});
+});
+
+function renderDanger(d){
+  var dl=d.delist||[];if(!dl.length){q('danger').innerHTML='<div class="item grn">şu an aktif delist bayrağı yok</div>';return;}
+  var h='<table><tr><th>#</th><th>Coin</th><th>Borsa</th><th>Tarih</th><th>Durum</th></tr>';
+  dl.forEach(function(it,i){h+='<tr><td class="mut">'+(i+1)+'</td><td><b class="red">'+esc(it.sym)+'</b></td><td>'+esc(it.borsa)+'</td><td class="mut">'+esc(it.tarih)+'</td><td><span class="lvl lvl-d">⛔ DELIST</span></td></tr>';});
+  h+='</table><div class="item mut" style="margin-top:6px">// borsanın kendi resmî kararı — tahmin değil. Bu coinlerden uzak durulması genelde en güvenlisidir.</div>';
+  q('danger').innerHTML=h;
+}
+function renderRadar(d){
+  var r='';var dp=d.depeg||[],da=dp.filter(function(x){return x.alarm});
+  if(da.length)da.forEach(function(x){r+='<div class="item red">🚨 <b>'+esc(x.sym)+'</b> DEPEG '+x.fiyat+' ('+x.sapma_pct+'%)</div>'});
+  else if(dp.length)r+='<div class="item grn">stablecoin peg ✓</div>';
+  var fu=d.funding_uc||[];if(fu.length){r+='<div class="item yel">aşırı funding: ';fu.forEach(function(f){r+='<span class="chip"><b>'+esc(f.sym)+'</b> '+f.rate_pct+'%</span>'});r+='</div>';}
+  var oi=d.oi_cliff||[];if(oi.length){r+='<div class="item red">📉 OI uçurumu: ';oi.forEach(function(o){r+='<span class="chip"><b>'+esc(o.sym)+'</b> '+o.chg_pct+'%</span>'});r+='</div>';}
+  var fg=d.fear_greed||{};if(fg.value)r+='<div class="item cy">Fear&Greed: '+fg.value+' ('+esc(fg.cls)+')</div>';
+  var kh=d.kaynak_hata||[];if(kh.length)r+='<div class="item yel">⚠ erişilemedi: '+esc(kh.join(', '))+' — BİLİNMİYOR</div>';
+  q('radar').innerHTML=(r||'<div class="item grn">aktif alarm yok</div>')+'<div id="arkhold"></div>';
+}
+function renderArk(a){
+  var h='',sz=a.sizinti||[],szs=sz.filter(function(x){return x.supheli});
+  if(sz.length){h+='<div class="item" style="margin-top:8px">🕵️ Sızıntı: '+sz.length+' ölçüldü → <b class="red">'+szs.length+' şüpheli</b></div>';
+    szs.slice(0,8).forEach(function(s){h+='<div class="item red">• <b>'+esc(s.sym)+'</b> duyuru öncesi 48s '+s.pre48_ret_pct+'% · hacim ×'+s.hacim_orani+'</div>'});}
+  var gh=(a.github||[]).filter(function(x){return x.olu});
+  if(gh.length)h+='<div class="item yel">💀 ölü proje: '+gh.map(function(x){return esc(x.sym)+' ('+x.ay_once+'ay)'}).join(', ')+'</div>';
+  var hold=q('arkhold');if(hold)hold.innerHTML=h;
+}
+</script>
+</body>
+</html>
