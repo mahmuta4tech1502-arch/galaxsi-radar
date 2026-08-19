@@ -1,6 +1,71 @@
-<!DOCTYPE html>
-<html lang="tr"><head><meta charset="utf-8"><title>GALAXSI Radar</title>
-<script>location.replace("/");</script></head>
-<body style="background:#0b1120;color:#e2e8f0;font-family:system-ui;padding:40px">
-Sayfa taşındı → <a style="color:#7dd3fc" href="/">vekilo.app</a>
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GALAXSI — Coin Risk Analizi</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#050807">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#050807;--pan:#0a100d;--ln:#123822;--ln2:#1e5c37;--grn:#39ff88;--red:#ff4d5e;--yel:#ffd166;--org:#ff9f43;--txt:#c9e8d4;--mut:#5f8a70}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,Segoe UI,Roboto,sans-serif;padding:20px 15px 60px}
+.w{max-width:760px;margin:0 auto}a{color:#5ce1e6;text-decoration:none}a:hover{text-decoration:underline}
+.top{font-size:13px;color:var(--mut)}.top a{color:var(--grn)}
+h1{font-size:26px;margin:14px 0 4px}h1 .s{color:var(--mut);font-size:18px}
+.v{border-radius:8px;padding:14px 16px;margin:14px 0;font-weight:700;border:1px solid}
+.v.danger{background:rgba(255,77,94,.1);border-color:#7a1520;color:var(--red)}
+.v.high{background:rgba(255,159,67,.09);border-color:#8a4b12;color:var(--org)}
+.v.mid{background:rgba(255,209,102,.08);border-color:#7a5d10;color:var(--yel)}
+.v.safe{background:rgba(57,255,136,.08);border-color:var(--ln2);color:var(--grn)}
+.card{border:1px solid var(--ln);background:var(--pan);border-radius:8px;padding:14px 16px;margin:12px 0}
+.card h2{font-size:15px;color:#5ce1e6;margin-bottom:8px}
+.flag{font-size:14px;margin:4px 0}.red{color:var(--red)}.yel{color:var(--yel)}.grn{color:var(--grn)}.mut{color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:14px}td{padding:6px 8px;border-top:1px solid rgba(18,56,34,.5)}td.k{color:var(--mut)}td.val{text-align:right;font-weight:600}
+.cta{display:block;text-align:center;background:var(--grn);color:#04140b;font-weight:700;padding:14px;border-radius:8px;margin:16px 0;font-size:16px}
+.goog-te-banner-frame{display:none!important}.goog-te-gadget{font-size:0!important}
+.goog-te-gadget .goog-te-combo{color:#111!important;background:#fff;border:0;border-radius:6px;padding:5px 8px;font:13px sans-serif;max-width:160px}
+#gtbar{position:fixed;top:8px;right:10px;z-index:30;background:rgba(10,16,13,.94);border:1px solid #1e5c37;border-radius:8px;padding:5px 9px}
+.foot{font-size:12px;color:var(--mut);border-top:1px solid var(--ln);padding-top:12px;margin-top:22px}
+</style></head><body>
+<div id="gtbar"><span style="color:#39ff88">🌐</span> <div id="google_translate_element" style="display:inline-block"></div></div>
+<script>function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'tr',autoDisplay:false},'google_translate_element');}</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<div class="w">
+<div class="top"><a href="/">GALAXSI</a> · Kripto Tehlike Radari / <a href="/coin/">tum coinler</a></div>
+<div id="hdr"><h1>Yükleniyor…</h1><div class="mut" style="font-size:13px">GALAXSI dinamik coin analizi</div></div>
+<div id="gxdeep"><div class="card"><div class="mut">🔬 Derin analiz yükleniyor… (17.000+ coinin hepsi bu sistemle analiz edilir)</div></div></div>
+<a class="cta" href="/#tara">🔍 Başka coin tara → GALAXSI</a>
+<div class="foot">Bu sayfa kamuya açık verilerin otomatik risk analizidir; <b>yatırım tavsiyesi değildir</b>. Veriler CoinGecko'dan canlı çekilir. Karar ve sonuç size aittir. · <a href="/">ana sayfa</a></div>
+</div>
+<script src="/deepcard.js"></script>
+<script>
+(function(){
+  var m=location.pathname.match(/^\/coin\/([a-z0-9\-\.]+)\/?$/i);
+  var hdr=document.getElementById('hdr');
+  if(!m){
+    hdr.innerHTML='<h1>Sayfa bulunamadı</h1><div class="mut">Aradığın sayfa yok. <a href="/" style="color:var(--grn)">Ana sayfaya dön</a> ya da <a href="/coin/" style="color:var(--grn)">coin listesine bak</a>.</div>';
+    document.getElementById('gxdeep').innerHTML='';
+    return;
+  }
+  var cid=m[1].toLowerCase();
+  document.title=cid+' Güvenli mi? Risk Analizi | GALAXSI';
+  /* başlık: hafif tekil sorgu — deepcard zaten tam veriyi çekiyor, başlığı oradan da doldurabiliriz */
+  fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+encodeURIComponent(cid))
+    .then(function(r){return r.json()}).then(function(rows){
+      var c=rows&&rows[0];
+      if(!c){hdr.innerHTML='<h1>'+cid+'</h1><div class="mut" style="font-size:13px">Toplu listede yok — aşağıdaki derin analiz yine de deneniyor…</div>';return;}
+      var name=c.name||cid,sym=(c.symbol||'').toUpperCase(),rank=c.market_cap_rank,ath=c.ath_change_percentage;
+      document.title=name+' ('+sym+') Güvenli mi? Risk Analizi | GALAXSI';
+      var vc='safe',vt='🟢 Belirgin bayrak yok';
+      if(!rank){vc='danger';vt='⛔ TEHLİKE — piyasa sıralaması yok';}
+      else if(ath!=null&&ath<=-95){vc='danger';vt='⛔ TEHLİKE — zirveden %'+Math.abs(Math.round(ath))+' düşmüş';}
+      else if(rank>2000){vc='danger';vt='⛔ TEHLİKE — sıralama #'+rank+' çok derin';}
+      else if(ath!=null&&ath<=-85){vc='mid';vt='🟡 ORTA RİSK — zirveden %'+Math.abs(Math.round(ath))+' düşmüş';}
+      else if(rank>500){vc='mid';vt='🟡 ORTA RİSK — düşük likidite bölgesi (#'+rank+')';}
+      function fp(n){if(n==null)return '-';return n<0.01?'$'+n.toFixed(8):n>=1000?'$'+Math.round(n).toLocaleString():'$'+n.toFixed(2);}
+      hdr.innerHTML='<h1>'+name+' <span class="s">('+sym+')</span> güvenli mi?</h1>'
+        +'<div class="mut" style="font-size:13px">GALAXSI dinamik analiz · sıralama '+(rank?'#'+rank:'yok')+' · fiyat '+fp(c.current_price)+'</div>'
+        +'<div class="v '+vc+'">'+vt+'</div>';
+    }).catch(function(){hdr.innerHTML='<h1>'+cid+'</h1>';});
+  if(window.GXDeep)GXDeep(cid);
+})();
+</script>
 </body></html>
