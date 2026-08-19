@@ -200,6 +200,16 @@
       </div>
       <div id="pcmsg" class="item mut" style="margin-top:8px">// kodu olanlar Pro'yu buradan açar · kod yoksa yukarıdan abone ol</div>
     </div></div>
+    <div id="prozone" style="display:none;margin-top:16px">
+      <div class="verdict v-safe" style="font-size:14px;margin-bottom:10px">🚀 <b>GALAXSI Pro — Üye Alanın AÇIK</b> · aşağıdaki araçlar sadece üyelere özel</div>
+      <div class="panel"><div class="phead"><span class="dot"></span>PORTFÖY TARAYICI :: coinlerini BİR ARADA tara (Pro)</div>
+      <div class="pbody">
+        <textarea id="port" placeholder="Elindeki coinleri yaz — örn: BTC, ETH, XRP, PEPE, DOGE, ACX" style="width:100%;min-height:60px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none;resize:vertical"></textarea>
+        <button id="portgo" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 22px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:.05em">TÜMÜNÜ TARA</button>
+        <div id="portres" style="margin-top:12px"><div class="item mut">// coinlerini yapıştır → hepsinin risk tablosu, en tehlikeli üstte</div></div>
+      </div></div>
+      <a href="/pro.html" class="btn btn-g" style="margin-top:4px">📊 Tam Pro Panel (tehlike sıralaması + tam radar) →</a>
+    </div>
     <div class="item mut" style="margin-top:10px">// ödeme uluslararası güvenli altyapıyla alınır · abonelik istediğin an iptal edilir · bu bir bilgi/risk servisidir, yatırım tavsiyesi değildir</div>
   </section>
 
@@ -381,8 +391,9 @@ mgo.addEventListener('click',function(){
   var inp=q('pcode'),btn=q('pcgo'),msg=q('pcmsg'),state=q('prostate');
   function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
   function showActive(tip){
-    state.innerHTML='<div class="verdict v-safe" style="font-size:14px">✅ <b>GALAXSI Pro AKTİF</b> — '+esc(tip)+' üyeliği<br><a href="/pro.html" style="display:inline-block;margin-top:10px;background:var(--grn);color:#04140b;padding:10px 22px;border-radius:6px;font-weight:700;text-decoration:none;letter-spacing:.05em">🚀 PRO PANELE GİT →</a></div>';
+    state.innerHTML='<div class="verdict v-safe" style="font-size:14px">✅ <b>GALAXSI Pro AKTİF</b> — '+esc(tip)+' üyeliği · üye araçların aşağıda açıldı 👇</div>';
     document.querySelectorAll('.plan .sub').forEach(function(b){b.textContent='✓ Zaten Pro';b.style.opacity='.55';b.disabled=true});
+    if(window.GX_showPro)window.GX_showPro();
   }
   var saved=null;try{saved=JSON.parse(localStorage.getItem('gx_pro')||'null')}catch(e){}
   if(saved&&saved.tip)showActive(saved.tip);
@@ -391,12 +402,39 @@ mgo.addEventListener('click',function(){
     msg.textContent='kontrol ediliyor…';
     sha(code).then(function(hx){var m=HASHES[hx];
       if(m){try{localStorage.setItem('gx_pro',JSON.stringify({tip:m,ts:Date.now()}))}catch(e){}
-        msg.innerHTML='<span class="grn">✓ Kod geçerli — Pro Panele yönlendiriliyorsun…</span>';showActive(m);
-        setTimeout(function(){location.href='/pro.html';},900);}
+        msg.innerHTML='<span class="grn">✓ Kod geçerli — üye alanın açıldı!</span>';showActive(m);
+        var z=q('prozone');if(z)setTimeout(function(){z.scrollIntoView({behavior:'smooth'})},250);}
       else{msg.innerHTML='<span class="red">✗ Geçersiz kod.</span> Doğru yazdığından emin ol.';}
     }).catch(function(){msg.innerHTML='<span class="yel">Tarayıcı kod doğrulamayı desteklemiyor (güvenli bağlantı gerekli).</span>'});
   }
   if(btn){btn.addEventListener('click',activate);inp.addEventListener('keydown',function(e){if(e.key==='Enter')activate()});}
+})();
+
+/* ── gömülü Pro üye alanı (aynı sayfada; kod veya satın-alım ?pro ile açılır) ── */
+(function(){
+  var zone=q('prozone');if(!zone)return;
+  function isPro(){try{return !!((JSON.parse(localStorage.getItem('gx_pro')||'null'))||{}).tip}catch(e){return false}}
+  if(/[?&]pro=/.test(location.search)&&!isPro()){try{localStorage.setItem('gx_pro',JSON.stringify({tip:'Üye',ts:Date.now()}))}catch(e){}}
+  window.GX_showPro=function(){zone.style.display='block'};
+  if(isPro())zone.style.display='block';
+  var LIST=null;
+  function loadList(){if(LIST)return Promise.resolve(LIST);return fetch('https://api.coingecko.com/api/v3/coins/list').then(function(r){return r.json()}).then(function(a){LIST={};a.forEach(function(c){var s=(c.symbol||'').toUpperCase();if(!LIST[s])LIST[s]=c.id});return LIST})}
+  function lvl(c){var f=0,d=0,sym=(c.symbol||'').toUpperCase();if((window.GX_DELIST||[]).indexOf(sym)>=0)d++;if(!c.market_cap_rank)d++;if(c.ath_change_percentage!=null&&c.ath_change_percentage<=-95)d++;else if(c.ath_change_percentage!=null&&c.ath_change_percentage<=-85)f++;if(c.market_cap_rank>2000)d++;else if(c.market_cap_rank>500)f++;if(c.total_volume&&c.market_cap&&c.total_volume/c.market_cap<0.01)f++;if(d)return{k:'d',t:'⛔ TEHLİKE',c:'--red'};if(f>=3)return{k:'h',t:'🔴 YÜKSEK',c:'--org'};if(f>=1)return{k:'m',t:'🟡 ORTA',c:'--yel'};return{k:'s',t:'🟢 TEMİZ',c:'--grn'}}
+  function pctS(n){if(n==null)return '<span class="mut">-</span>';return '<span class="'+(n>=0?'grn':'red')+'">'+(n>=0?'▲':'▼')+'%'+Math.abs(n).toFixed(1)+'</span>'}
+  var pg=q('portgo'),pr=q('portres'),pt=q('port');
+  if(pg)pg.addEventListener('click',function(){
+    var syms=[];(pt.value||'').toUpperCase().split(/[\s,;\n]+/).filter(Boolean).forEach(function(s){if(syms.indexOf(s)<0&&syms.length<15)syms.push(s)});
+    if(!syms.length)return;pr.innerHTML='<div class="item mut">taranıyor: '+syms.length+' coin…</div>';
+    loadList().then(function(map){var ids=syms.map(function(s){return map[s]}).filter(Boolean);if(!ids.length){pr.innerHTML='<div class="item yel">coin bulunamadı — sembolleri kontrol et</div>';return;}
+      return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&price_change_percentage=24h,7d').then(function(r){return r.json()}).then(function(rows){
+        rows.sort(function(a,b){return ({d:0,h:1,m:2,s:3}[lvl(a).k])-({d:0,h:1,m:2,s:3}[lvl(b).k])});
+        var dg=0,h='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><tr><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">COİN</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">RİSK</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">FİYAT</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">24s</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">ZİRVEDEN</th></tr>';
+        rows.forEach(function(c){var L=lvl(c);if(L.k==='d')dg++;h+='<tr style="border-top:1px solid rgba(18,56,34,.5)"><td style="padding:6px"><b>'+esc((c.symbol||'').toUpperCase())+'</b> <span class="mut">#'+(c.market_cap_rank||'-')+'</span></td><td style="padding:6px;color:var('+L.c+');font-weight:700">'+L.t+'</td><td style="padding:6px">'+(c.current_price!=null?'$'+(c.current_price<1?c.current_price.toFixed(5):Number(c.current_price).toLocaleString()):'-')+'</td><td style="padding:6px">'+pctS(c.price_change_percentage_24h_in_currency)+'</td><td style="padding:6px" class="'+(c.ath_change_percentage<-80?'red':'yel')+'">%'+Math.round(c.ath_change_percentage||0)+'</td></tr>';});
+        h+='</table></div>';
+        pr.innerHTML='<div class="item" style="margin-bottom:6px"><b>'+rows.length+' coin tarandı</b>'+(dg?' · <span class="red">'+dg+' TEHLİKE bulundu</span>':' · <span class="grn">delist bayrağı yok</span>')+'</div>'+h+'<div class="item mut" style="margin-top:6px">// "TEMİZ" = tuzak yok demek, "AL" demek DEĞİL · yatırım tavsiyesi değildir</div>';
+      });
+    }).catch(function(){pr.innerHTML='<div class="item yel">Kaynak meşgul (çok hızlı sorgu). 1 dk sonra tekrar dene — durum BİLİNMİYOR.</div>'});
+  });
 })();
 
 /* ── canli veri ── */
@@ -404,6 +442,7 @@ fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(functio
   var age=(Date.now()/1000-(d.updated||0))/60;q('s-age').textContent=age<60?Math.round(age)+" dk":Math.round(age/60)+" sa";
   if(age>150)q('fresh').innerHTML='<div class="warnbox">⚠ <b>BİLİNMİYOR — veri '+Math.round(age)+' dk eski.</b> Radar gecikmiş olabilir; uyarı-yok = güvenli VARSAYMA.</div>';
   var dl=d.delist||[],h='';q('s-flags').textContent=dl.length;
+  window.GX_DELIST=dl.map(function(x){return (x.sym||'').toUpperCase()});
   for(var i=0;i<Math.min(dl.length,15);i++){var it=dl[i];h+='<div class="item red">⛔ <b>'+esc(it.sym)+'</b> <span class="mut">—</span> '+esc(it.borsa)+' <span class="mut">· '+esc(it.tarih)+'</span></div>';}
   if(dl.length>15)h+='<div class="item mut">+'+(dl.length-15)+' bayrak daha</div>';
   q('delist').innerHTML=(h||'<div class="item mut">aktif bayrak yok</div>')+'<div class="item mut" style="margin-top:8px">// son 30 günün resmî delist duyuruları — borsanın kararı, tahmin değil</div>';
