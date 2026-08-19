@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <title>GALAXSI Pro Panel</title>
 <script>/* OTO-GUNCELLEME */
-(function(){try{var GX_VER='20260819c';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819d';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -75,7 +75,7 @@ body{top:0!important}
   <div class="ttl">🎯 Portföy Tarayıcı — hepsini bir arada tara</div>
   <div class="panel"><div class="phead">Elindeki/izlediğin coinleri yaz (virgül veya alt alta) → tek seferde risk raporu</div>
   <div class="pbody">
-    <textarea id="port" placeholder="BTC, ETH, XRP, PEPE, DOGE, SHIB, ACX ..."></textarea>
+    <textarea id="port" placeholder="örn: BTC, ETH, DOGE, PEPE, SHIB … — kendi coinlerini buraya yaz (bu satır sadece örnektir)"></textarea>
     <button id="portgo">TÜMÜNÜ TARA</button>
     <div id="portres" style="margin-top:12px"></div>
   </div></div>
@@ -138,35 +138,53 @@ function riskLevel(c){
   return {k:'s',t:'🟢 TEMİZ',n:0};
 }
 
-/* PORTFÖY TARAYICI — her coin /search ile DOĞRU id'ye çözülür (DOGE→dogecoin, #10), sonra toplu /markets.
-   Satıra tıklanınca o coinin DERİN raporuna (/coin/<id>/) gider. */
+/* PORTFÖY TARAYICI — top-500'den DOĞRU coini bulur (DOGE→dogecoin #10, kopya token DEĞİL);
+   liste dışı/delisted coinler icin /search yedegi; BOŞ girişte örnek liste taranir; satira tikla → derin rapor. */
+var TOPMAP=null;
+function loadTop(){if(TOPMAP)return Promise.resolve(TOPMAP);
+  return Promise.all([1,2].map(function(p){
+    return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page='+p+'&price_change_percentage=24h,7d').then(function(r){return r.json()}).catch(function(){return [];});
+  })).then(function(pages){var m={s:{},id:{}};
+    pages.forEach(function(rows){(rows||[]).forEach(function(c){var k=(c.symbol||'').toUpperCase();if(!m.s[k])m.s[k]=c;m.id[c.id]=c;});});
+    TOPMAP=m;return m;});}
+function renderPort(list,miss,note){
+  list.sort(function(a,b){var oa={d:0,h:1,m:2,s:3}[riskLevel(a).k],ob={d:0,h:1,m:2,s:3}[riskLevel(b).k];return oa-ob;});
+  var danger=0,h='<table><tr><th>Coin</th><th>Risk</th><th>Fiyat</th><th>24s</th><th>7g</th><th>Zirveden</th></tr>';
+  list.forEach(function(c){var lv=riskLevel(c);if(lv.k==='d')danger++;
+    h+='<tr style="cursor:pointer" onclick="location.href=\'/coin/'+c.id+'/\'" title="tam derin rapor için tıkla">'
+      +'<td><b style="color:#5ce1e6">'+esc((c.symbol||'').toUpperCase())+'</b> <span class="mut">#'+(c.market_cap_rank||'-')+'</span><br><span class="mut" style="font-size:11px">'+esc(c.name||'')+' → tam rapor</span></td>'
+      +'<td><span class="lvl lvl-'+lv.k+'">'+lv.t+'</span></td>'
+      +'<td>'+fmtUsd(c.current_price)+'</td>'
+      +'<td>'+pct(c.price_change_percentage_24h_in_currency)+'</td>'
+      +'<td>'+pct(c.price_change_percentage_7d_in_currency)+'</td>'
+      +'<td class="'+(c.ath_change_percentage<-80?'red':c.ath_change_percentage<-40?'yel':'grn')+'">%'+Math.round(c.ath_change_percentage||0)+'</td></tr>';});
+  h+='</table>';
+  var head='<div class="item" style="font-size:13px;margin-bottom:6px"><b>'+list.length+' coin tarandı</b>'+(danger?' · <span class="red">'+danger+' TEHLİKE</span>':' · <span class="grn">delist bayrağı yok</span>')+'</div>';
+  if(note)head+='<div class="item" style="color:#5ce1e6">'+note+'</div>';
+  if(miss&&miss.length)head+='<div class="item yel">⚠ bulunamadı: '+esc(miss.join(', '))+' (isim/sembolü kontrol et)</div>';
+  q('portres').innerHTML=head+h+'<div class="item mut" style="margin-top:6px">// satıra tıkla → o coinin tam derin raporu · "TEMİZ" = tuzak yok, "AL" DEĞİL · yatırım tavsiyesi değildir</div>';
+}
 q('portgo').addEventListener('click',function(){
-  var raw=(q('port').value||'').split(/[\s,;\n]+/).filter(Boolean);
-  var qterms=[];raw.forEach(function(s){if(qterms.indexOf(s)<0&&qterms.length<15)qterms.push(s)});
-  if(!qterms.length)return;
-  q('portres').innerHTML='<div class="item mut">taranıyor: '+qterms.length+' coin …</div>';
-  Promise.all(qterms.map(function(t){
-    return fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(t)).then(function(r){return r.json()})
-      .then(function(s){var c=(s.coins||[])[0];return {term:t,id:c?c.id:null};}).catch(function(){return {term:t,id:null};});
-  })).then(function(resv){
-    var ids=resv.filter(function(x){return x.id}).map(function(x){return x.id});
-    var eksik=resv.filter(function(x){return !x.id}).map(function(x){return x.term});
-    if(!ids.length){q('portres').innerHTML='<div class="item yel">coin bulunamadı — isim/sembolleri kontrol et</div>';return;}
-    return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&price_change_percentage=24h,7d,30d').then(function(r){return r.json()}).then(function(rows){
-      rows.sort(function(a,b){var oa={d:0,h:1,m:2,s:3}[riskLevel(a).k],ob={d:0,h:1,m:2,s:3}[riskLevel(b).k];return oa-ob;});
-      var danger=0,h='<table><tr><th>Coin</th><th>Risk</th><th>Fiyat</th><th>24s</th><th>7g</th><th>Zirveden</th></tr>';
-      rows.forEach(function(c){var lv=riskLevel(c);if(lv.k==='d')danger++;
-        h+='<tr style="cursor:pointer" onclick="location.href=\'/coin/'+c.id+'/\'" title="tam derin rapor için tıkla">'
-          +'<td><b style="color:#5ce1e6">'+esc((c.symbol||'').toUpperCase())+'</b> <span class="mut">#'+(c.market_cap_rank||'-')+'</span><br><span class="mut" style="font-size:11px">'+esc(c.name||'')+' → tam rapor</span></td>'
-          +'<td><span class="lvl lvl-'+lv.k+'">'+lv.t+'</span></td>'
-          +'<td>'+fmtUsd(c.current_price)+'</td>'
-          +'<td>'+pct(c.price_change_percentage_24h_in_currency)+'</td>'
-          +'<td>'+pct(c.price_change_percentage_7d_in_currency)+'</td>'
-          +'<td class="'+(c.ath_change_percentage<-80?'red':c.ath_change_percentage<-40?'yel':'grn')+'">%'+Math.round(c.ath_change_percentage||0)+'</td></tr>';});
-      h+='</table>';
-      var head='<div class="item" style="font-size:13px;margin-bottom:6px"><b>'+rows.length+' coin tarandı</b>'+(danger?' · <span class="red">'+danger+' TEHLİKE</span>':' · <span class="grn">delist bayrağı yok</span>')+'</div>';
-      if(eksik.length)head+='<div class="item yel">⚠ bulunamadı: '+esc(eksik.join(', '))+' (isim/sembolü kontrol et)</div>';
-      q('portres').innerHTML=head+h+'<div class="item mut" style="margin-top:6px">// satıra tıkla → o coinin tam derin raporu · "TEMİZ" = tuzak yok demek, "AL" demek DEĞİL · yatırım tavsiyesi değildir</div>';
+  var raw=(q('port').value||'').split(/[\s,;\n]+/).filter(Boolean),note='';
+  if(!raw.length){raw=['BTC','ETH','XRP','PEPE','DOGE','SHIB','ACX'];note='ℹ Kutu boştu — örnek liste tarandı. Kendi coinlerini yazıp tekrar tara.';}
+  var terms=[];raw.forEach(function(s){if(terms.indexOf(s)<0&&terms.length<20)terms.push(s)});
+  q('portres').innerHTML='<div class="item mut">taranıyor: '+terms.length+' coin …</div>';
+  loadTop().then(function(map){
+    var list=[],miss=[],seen={};
+    terms.forEach(function(t){var c=map.s[t.toUpperCase()]||map.id[t.toLowerCase()];
+      if(c){if(!seen[c.id]){seen[c.id]=1;list.push(c);}}else miss.push(t);});
+    if(!miss.length){renderPort(list,[],note);return;}
+    return Promise.all(miss.map(function(t){
+      return fetch('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(t)).then(function(r){return r.json()})
+        .then(function(s){var c=(s.coins||[])[0];return {t:t,id:c?c.id:null};}).catch(function(){return {t:t,id:null};});
+    })).then(function(rr){
+      var ids=rr.filter(function(x){return x.id}).map(function(x){return x.id});
+      var realMiss=rr.filter(function(x){return !x.id}).map(function(x){return x.t});
+      if(!ids.length){renderPort(list,realMiss,note);return;}
+      return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&price_change_percentage=24h,7d').then(function(r){return r.json()}).then(function(rows2){
+        (rows2||[]).forEach(function(c){if(!seen[c.id]){seen[c.id]=1;list.push(c);}});
+        renderPort(list,realMiss,note);
+      });
     });
   }).catch(function(){q('portres').innerHTML='<div class="item yel">Kaynak meşgul (çok hızlı sorgu). 1 dk sonra tekrar dene — durum BİLİNMİYOR.</div>'});
 });
