@@ -390,8 +390,18 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
     else if(warn.length>=1){ocls='v-mid';ozet='🟡 <b>Bazı uyarılar var ama ciddi kırmızı bayrak yok.</b> Orta risk. Uyarıları değerlendir, acele karar verme — para senin.';}
     else{ocls='v-safe';ozet='🟢 <b>Taradığımız tuzaklardan hiçbiri şu an aktif değil.</b> AMA bu "güvenli, al" demek DEĞİL — sadece bizim kontrol listemizde alarm yok. Büyük ve köklü coinlerde bile fiyat düşebilir; kendi araştırmanı da yap.';}
     h+='<div class="verdict '+ocls+'" style="margin-top:12px;font-weight:400;font-size:13px;line-height:1.65">📋 <b style="letter-spacing:.05em">NE ANLAMA GELİYOR</b><br>'+ozet+'</div>';
+    /* paylaş butonları — viral döngü */
+    var vt=vt2(cls),shareTxt='🛡 '+sym+' ('+esc(d.name)+') GALAXSI tehlike taraması: '+vt+'. Sen de bak →',url='https://vekilo.app/coin/'+encodeURIComponent(d.id)+'/',urlEnc=encodeURIComponent(url),txtEnc=encodeURIComponent(shareTxt);
+    h+='<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+      +'<span class="item mut" style="margin:0">Paylaş:</span>'
+      +'<a href="https://twitter.com/intent/tweet?text='+txtEnc+'&url='+urlEnc+'" target="_blank" class="btn btn-g" style="padding:7px 14px">𝕏 Twitter</a>'
+      +'<a href="https://wa.me/?text='+txtEnc+'%20'+urlEnc+'" target="_blank" class="btn btn-g" style="padding:7px 14px">WhatsApp</a>'
+      +'<a href="https://t.me/share/url?url='+urlEnc+'&text='+txtEnc+'" target="_blank" class="btn btn-g" style="padding:7px 14px">Telegram</a>'
+      +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+url+'\');this.textContent=\'✓ Kopyalandı\'" class="btn btn-g" style="padding:7px 14px;cursor:pointer">🔗 Kopyala</button>'
+      +'</div>';
     h+='<div class="item mut" style="margin-top:8px">// Tüm veriler kamuya açık kaynaklardan (CoinGecko) canlı çekildi. Karar ve sonuç sana aittir; bu yatırım tavsiyesi değildir. · <a href="#pro" style="color:var(--grn)">⭐ Bu taramaları anlık alarmla al → Pro</a></div>';
     res.innerHTML=h;
+    function vt2(c){return c==='v-danger'?'TEHLİKE':c==='v-high'?'YÜKSEK RİSK':c==='v-mid'?'ORTA RİSK':'bayrak yok';}
   }
   btn.addEventListener('click',run);
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')run()});
