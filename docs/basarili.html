@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ödemen Alındı — GALAXSI Pro</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#050807">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#050807;--pan:#0a100d;--ln:#123822;--ln2:#1e5c37;--grn:#39ff88;--red:#ff4d5e;--yel:#ffd166;--txt:#c9e8d4;--mut:#5f8a70}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,Segoe UI,Roboto,sans-serif;padding:24px 16px;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.w{max-width:520px;width:100%;text-align:center}
+a{color:#5ce1e6;text-decoration:none}
+h1{font-size:24px;margin:10px 0}
+.card{border:1px solid var(--ln);background:var(--pan);border-radius:12px;padding:22px 18px;margin:14px 0}
+.spin{width:34px;height:34px;border:3px solid var(--ln2);border-top-color:var(--grn);border-radius:50%;animation:s 1s linear infinite;margin:8px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+.code{font:700 26px/1.2 ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;color:var(--grn);background:rgba(57,255,136,.08);border:1px dashed var(--ln2);border-radius:10px;padding:16px;margin:12px 0;user-select:all;word-break:break-all}
+.btn{display:inline-block;background:var(--grn);color:#04140b;font-weight:700;padding:13px 20px;border-radius:9px;border:0;font-size:16px;cursor:pointer;margin:6px 4px}
+.btn.g{background:transparent;color:var(--grn);border:1px solid var(--ln2)}
+.mut{color:var(--mut);font-size:13px}.red{color:var(--red)}.grn{color:var(--grn)}.yel{color:var(--yel)}
+</style></head><body><div class="w">
+<div style="font-size:40px">🛡️</div>
+<h1>GALAXSI Pro — Ödeme</h1>
+<div class="card" id="box">
+  <div class="spin"></div>
+  <div id="msg" style="margin-top:10px">Ödemen kontrol ediliyor…</div>
+  <div class="mut" id="sub" style="margin-top:8px">Kripto onayı birkaç dakika sürebilir — bu sayfayı kapatma.</div>
+</div>
+<div class="mut">Sorun olursa: <a href="https://t.me/eva_trade_alerts_bot" target="_blank">Telegram destek</a> · <a href="/">ana sayfa</a></div>
+</div>
+<script src="/gxconfig.js"></script>
+<script>
+(function(){
+  var box=document.getElementById('box'),msg=document.getElementById('msg'),sub=document.getElementById('sub');
+  var qs=new URLSearchParams(location.search);
+  var pid=qs.get('NP_id')||qs.get('pid')||qs.get('paymentId')||qs.get('payment_id')||'';
+  var W=(window.GX_WORKER||'').replace(/\/$/,'');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  if(!W){
+    box.innerHTML='<div style="font-size:34px">✅</div><h1 class="grn" style="font-size:20px">Ödemen alındı!</h1>'
+      +'<div class="mut" style="margin-top:8px">Üyelik kodun en geç birkaç dakika içinde <a href="https://t.me/eva_trade_alerts_bot" target="_blank">Telegram</a> üzerinden sana ulaşacak. Teşekkürler!</div>';
+    return;
+  }
+  if(!pid){
+    box.innerHTML='<div style="font-size:34px">✅</div><h1 class="grn" style="font-size:20px">Ödemen alındı!</h1>'
+      +'<div class="mut" style="margin-top:8px">Kodunu görmek için ödeme sonrası yönlendirme gerekiyordu. Kodun <a href="https://t.me/eva_trade_alerts_bot" target="_blank">Telegram</a>\'dan da gelir; ya da kodun eline geçince ana sayfadaki "Üyelik Kodu" kutusuna gir.</div>';
+    return;
+  }
+
+  var tries=0,MAX=50;
+  function done(code,plan){
+    box.innerHTML='<div style="font-size:34px">🎉</div><h1 class="grn" style="font-size:20px">Ödemen onaylandı — '+esc(plan||'Pro')+'!</h1>'
+      +'<div class="mut" style="margin-top:6px">Üyelik kodun (sakla):</div>'
+      +'<div class="code" id="c">'+esc(code)+'</div>'
+      +'<button class="btn" id="open">🔓 Pro\'yu Şimdi Aç</button> '
+      +'<button class="btn g" id="copy">📋 Kodu Kopyala</button>'
+      +'<div class="mut" style="margin-top:12px">Kodun kaybolursa ana sayfadaki "Üyelik Kodu" kutusuna bu kodu girerek yine açabilirsin.</div>';
+    document.getElementById('copy').onclick=function(){try{navigator.clipboard.writeText(code)}catch(e){}this.textContent='✓ Kopyalandı';};
+    document.getElementById('open').onclick=function(){
+      try{localStorage.setItem('gx_pro',JSON.stringify({tip:plan||'Pro',ts:Date.now()}))}catch(e){}
+      location.href='/?pro=1';
+    };
+  }
+  function poll(){
+    tries++;
+    fetch(W+'/code?pid='+encodeURIComponent(pid)).then(function(r){return r.json()}).then(function(j){
+      if(j&&j.ready&&j.code){done(j.code,j.plan);return;}
+      if(tries>=MAX){
+        box.innerHTML='<div style="font-size:32px">⌛</div><div style="margin-top:8px">Ödemen hâlâ onaylanıyor olabilir (kripto ağları bazen yavaş).</div>'
+          +'<div class="mut" style="margin-top:8px">Kodun onaylanınca <a href="https://t.me/eva_trade_alerts_bot" target="_blank">Telegram</a>\'dan gelecek. Bu sayfayı yenilemeyi de deneyebilirsin.</div>';
+        return;
+      }
+      if(tries===2)sub.textContent='Onay bekleniyor… (kripto ağı onayı 1-5 dk sürebilir)';
+      setTimeout(poll,6000);
+    }).catch(function(){ if(tries<MAX) setTimeout(poll,6000); });
+  }
+  poll();
+})();
+</script>
+</body></html>

@@ -7,13 +7,14 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819e';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819f';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
 <meta property="og:title" content="GALAXSI — Kripto Tehlike Radarı">
 <meta property="og:description" content="Tuzakları insanlardan önce görür. 17.000+ coin risk taraması · resmî delist takibi · cüzdan taraması · anlık Telegram alarmı. Kâr sinyali satmaz; riski gösterir.">
 <meta property="og:image" content="https://vekilo.app/og.png">
+<script src="/gxconfig.js"></script>
 <meta property="og:url" content="https://vekilo.app/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -526,14 +527,20 @@ mgo.addEventListener('click',function(){
     if(window.GX_showPro)window.GX_showPro();
   }
   var saved=null;try{saved=JSON.parse(localStorage.getItem('gx_pro')||'null')}catch(e){}
-  if(saved&&saved.tip)showActive(saved.tip);
+  if(saved&&saved.tip&&(!saved.exp||Date.now()<saved.exp))showActive(saved.tip);
+  function unlock(tip,exp){try{localStorage.setItem('gx_pro',JSON.stringify({tip:tip,ts:Date.now(),exp:exp||null}))}catch(e){}
+    msg.innerHTML='<span class="grn">✓ Kod geçerli — '+esc(tip)+' üyeliğin açıldı!</span>';showActive(tip);
+    var z=q('prozone');if(z)setTimeout(function(){z.scrollIntoView({behavior:'smooth'})},250);}
   function activate(){
     var code=(inp.value||'').trim().toUpperCase();if(!code)return;
     msg.textContent='kontrol ediliyor…';
     sha(code).then(function(hx){var m=HASHES[hx];
-      if(m){try{localStorage.setItem('gx_pro',JSON.stringify({tip:m,ts:Date.now()}))}catch(e){}
-        msg.innerHTML='<span class="grn">✓ Kod geçerli — üye alanın açıldı!</span>';showActive(m);
-        var z=q('prozone');if(z)setTimeout(function(){z.scrollIntoView({behavior:'smooth'})},250);}
+      if(m){unlock(m);return;}
+      var w=(window.GX_WORKER||'').replace(/\/$/,'');
+      if(w){fetch(w+'/validate?code='+encodeURIComponent(code)).then(function(r){return r.json()}).then(function(v){
+        if(v&&v.valid){unlock(v.plan||'Pro',v.exp);}
+        else{msg.innerHTML='<span class="red">✗ Geçersiz'+(v&&v.expired?' / süresi dolmuş':'')+' kod.</span> Doğru yazdığından emin ol.';}
+      }).catch(function(){msg.innerHTML='<span class="red">✗ Kod doğrulanamadı — bağlantını kontrol et.</span>';});}
       else{msg.innerHTML='<span class="red">✗ Geçersiz kod.</span> Doğru yazdığından emin ol.';}
     }).catch(function(){msg.innerHTML='<span class="yel">Tarayıcı kod doğrulamayı desteklemiyor (güvenli bağlantı gerekli).</span>'});
   }
