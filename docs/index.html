@@ -208,9 +208,37 @@
         <button id="portgo" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 22px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:.05em">TÜMÜNÜ TARA</button>
         <div id="portres" style="margin-top:12px"><div class="item mut">// coinlerini yapıştır → hepsinin risk tablosu, en tehlikeli üstte</div></div>
       </div></div>
+      <div class="panel"><div class="phead"><span class="dot"></span>CÜZDANIMI TARA :: adresini yapıştır → içindeki coinler taransın (Pro)</div>
+      <div class="pbody">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="waddr" placeholder="0x… (Ethereum cüzdan adresi)" autocomplete="off" style="flex:1;min-width:200px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none">
+          <button id="wgo" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer">CÜZDANI TARA</button>
+        </div>
+        <div id="wres" style="margin-top:10px"><div class="item mut">// cüzdanındaki tokenler otomatik bulunur ve risk-taranır · adresin sadece OKUNUR, hiçbir yetki istenmez · şimdilik Ethereum, BSC yakında</div></div>
+      </div></div>
+      <div class="panel"><div class="phead"><span class="dot"></span>LİNK/METİN TARA :: sana atılan coin mesajını yapıştır (Pro)</div>
+      <div class="pbody">
+        <textarea id="ltxt" placeholder="Telegram/Twitter'da sana atılan mesajı ya da kontrat adresini (0x…) buraya yapıştır" style="width:100%;min-height:52px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:10px 12px;color:var(--grn);font:inherit;outline:none;resize:vertical"></textarea>
+        <button id="lgo" style="background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px">MESAJI TARA</button>
+        <div id="lres" style="margin-top:10px"><div class="item mut">// "şu coine gir" mesajlarındaki coinleri/kontratları bulur, tuzak var mı bakar — grup-pump tuzağına karşı</div></div>
+      </div></div>
+      <div class="item mut" style="margin:8px 0 4px">🔜 <b class="yel">Yolda:</b> Telegram anlık alarm · delist erken-uyarı · BSC cüzdan desteği — üyeliğin hepsini kapsar, geldiğinde otomatik açılır</div>
       <a href="/pro.html" class="btn btn-g" style="margin-top:4px">📊 Tam Pro Panel (tehlike sıralaması + tam radar) →</a>
     </div>
     <div class="item mut" style="margin-top:10px">// ödeme uluslararası güvenli altyapıyla alınır · abonelik istediğin an iptal edilir · bu bir bilgi/risk servisidir, yatırım tavsiyesi değildir</div>
+  </section>
+
+  <section id="topluluk">
+    <div class="ttl">🌐 GALAXSI Topluluğu</div>
+    <div class="item mut" style="margin-bottom:10px">// Sınırsız konu-odaları: coin tartış, resim/grafik paylaş, soru sor, şikayet et — <b class="grn">okuyoruz ve düzeltiyoruz</b>. Pro üyelerin özel odası ayrı.</div>
+    <div class="grid">
+      <div class="card"><span class="ic">💬</span><h3>Genel Forum</h3><p>Herkese açık konu-odaları: coin tartışmaları, tuzak ihbarları, resim/grafik paylaşımı, istediğin odayı aç.</p>
+        <a id="cbForum" class="btn btn-g" style="margin-top:10px;display:inline-block;opacity:.5;pointer-events:none">⏳ Kuruluyor…</a></div>
+      <div class="card"><span class="ic">📢</span><h3>Duyurular</h3><p>Yeni özellikler, kritik bayraklar ve sistem haberleri — tek yönlü, temiz akış.</p>
+        <a id="cbDuyuru" class="btn btn-g" style="margin-top:10px;display:inline-block;opacity:.5;pointer-events:none">⏳ Kuruluyor…</a></div>
+      <div class="card"><span class="ic">🔒</span><h3>Pro Özel Oda</h3><p>Sadece üyeler: anlık alarmlar, derin analiz paylaşımları, öncelikli destek.</p>
+        <a id="cbPro" class="btn btn-g" style="margin-top:10px;display:inline-block;opacity:.5;pointer-events:none">⏳ Kuruluyor…</a></div>
+    </div>
   </section>
 
   <footer>
@@ -410,7 +438,13 @@ mgo.addEventListener('click',function(){
   if(btn){btn.addEventListener('click',activate);inp.addEventListener('keydown',function(e){if(e.key==='Enter')activate()});}
 })();
 
-/* ── gömülü Pro üye alanı (aynı sayfada; kod veya satın-alım ?pro ile açılır) ── */
+/* ── topluluk linkleri (Telegram odaları — linkler gelince aktifleşir) ── */
+window.GX_COMMUNITY={forum:'',duyuru:'',pro:''};
+(function(){var m={forum:['cbForum','💬 Foruma Gir'],duyuru:['cbDuyuru','📢 Kanala Katıl'],pro:['cbPro','🔒 Özel Odaya Gir']};
+Object.keys(m).forEach(function(k){var el=q(m[k][0]),u=(window.GX_COMMUNITY||{})[k];
+if(el&&u){el.href=u;el.textContent=m[k][1];el.style.opacity='1';el.style.pointerEvents='auto';el.target='_blank';}});})();
+
+/* ── gömülü Pro üye alanı: 3 tarayıcı (portföy + cüzdan + link) ── */
 (function(){
   var zone=q('prozone');if(!zone)return;
   function isPro(){try{return !!((JSON.parse(localStorage.getItem('gx_pro')||'null'))||{}).tip}catch(e){return false}}
@@ -421,19 +455,56 @@ mgo.addEventListener('click',function(){
   function loadList(){if(LIST)return Promise.resolve(LIST);return fetch('https://api.coingecko.com/api/v3/coins/list').then(function(r){return r.json()}).then(function(a){LIST={};a.forEach(function(c){var s=(c.symbol||'').toUpperCase();if(!LIST[s])LIST[s]=c.id});return LIST})}
   function lvl(c){var f=0,d=0,sym=(c.symbol||'').toUpperCase();if((window.GX_DELIST||[]).indexOf(sym)>=0)d++;if(!c.market_cap_rank)d++;if(c.ath_change_percentage!=null&&c.ath_change_percentage<=-95)d++;else if(c.ath_change_percentage!=null&&c.ath_change_percentage<=-85)f++;if(c.market_cap_rank>2000)d++;else if(c.market_cap_rank>500)f++;if(c.total_volume&&c.market_cap&&c.total_volume/c.market_cap<0.01)f++;if(d)return{k:'d',t:'⛔ TEHLİKE',c:'--red'};if(f>=3)return{k:'h',t:'🔴 YÜKSEK',c:'--org'};if(f>=1)return{k:'m',t:'🟡 ORTA',c:'--yel'};return{k:'s',t:'🟢 TEMİZ',c:'--grn'}}
   function pctS(n){if(n==null)return '<span class="mut">-</span>';return '<span class="'+(n>=0?'grn':'red')+'">'+(n>=0?'▲':'▼')+'%'+Math.abs(n).toFixed(1)+'</span>'}
-  var pg=q('portgo'),pr=q('portres'),pt=q('port');
-  if(pg)pg.addEventListener('click',function(){
-    var syms=[];(pt.value||'').toUpperCase().split(/[\s,;\n]+/).filter(Boolean).forEach(function(s){if(syms.indexOf(s)<0&&syms.length<15)syms.push(s)});
-    if(!syms.length)return;pr.innerHTML='<div class="item mut">taranıyor: '+syms.length+' coin…</div>';
-    loadList().then(function(map){var ids=syms.map(function(s){return map[s]}).filter(Boolean);if(!ids.length){pr.innerHTML='<div class="item yel">coin bulunamadı — sembolleri kontrol et</div>';return;}
+  var STOPW=['THE','AND','FOR','WWW','COM','HTTP','HTTPS','USDT','USD','BUY','SELL','NOW','GEM','100X','TO','IS','AL','SAT','COIN','TOKEN','GX','PRO'];
+  function scanSyms(syms,out){
+    if(!syms.length){out.innerHTML='<div class="item yel">taranacak coin bulunamadı</div>';return;}
+    out.innerHTML='<div class="item mut">taranıyor: '+syms.length+' coin…</div>';
+    loadList().then(function(map){var ids=syms.map(function(s){return map[s]}).filter(Boolean);
+      if(!ids.length){out.innerHTML='<div class="item yel">coin bulunamadı — sembolleri kontrol et</div>';return;}
       return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&price_change_percentage=24h,7d').then(function(r){return r.json()}).then(function(rows){
         rows.sort(function(a,b){return ({d:0,h:1,m:2,s:3}[lvl(a).k])-({d:0,h:1,m:2,s:3}[lvl(b).k])});
         var dg=0,h='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><tr><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">COİN</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">RİSK</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">FİYAT</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">24s</th><th style="text-align:left;color:var(--mut);padding:6px;font-weight:400">ZİRVEDEN</th></tr>';
         rows.forEach(function(c){var L=lvl(c);if(L.k==='d')dg++;h+='<tr style="border-top:1px solid rgba(18,56,34,.5)"><td style="padding:6px"><b>'+esc((c.symbol||'').toUpperCase())+'</b> <span class="mut">#'+(c.market_cap_rank||'-')+'</span></td><td style="padding:6px;color:var('+L.c+');font-weight:700">'+L.t+'</td><td style="padding:6px">'+(c.current_price!=null?'$'+(c.current_price<1?c.current_price.toFixed(5):Number(c.current_price).toLocaleString()):'-')+'</td><td style="padding:6px">'+pctS(c.price_change_percentage_24h_in_currency)+'</td><td style="padding:6px" class="'+(c.ath_change_percentage<-80?'red':'yel')+'">%'+Math.round(c.ath_change_percentage||0)+'</td></tr>';});
         h+='</table></div>';
-        pr.innerHTML='<div class="item" style="margin-bottom:6px"><b>'+rows.length+' coin tarandı</b>'+(dg?' · <span class="red">'+dg+' TEHLİKE bulundu</span>':' · <span class="grn">delist bayrağı yok</span>')+'</div>'+h+'<div class="item mut" style="margin-top:6px">// "TEMİZ" = tuzak yok demek, "AL" demek DEĞİL · yatırım tavsiyesi değildir</div>';
+        out.innerHTML='<div class="item" style="margin-bottom:6px"><b>'+rows.length+' coin tarandı</b>'+(dg?' · <span class="red">'+dg+' TEHLİKE bulundu</span>':' · <span class="grn">delist bayrağı yok</span>')+'</div>'+h+'<div class="item mut" style="margin-top:6px">// "TEMİZ" = tuzak yok demek, "AL" demek DEĞİL · yatırım tavsiyesi değildir</div>';
       });
-    }).catch(function(){pr.innerHTML='<div class="item yel">Kaynak meşgul (çok hızlı sorgu). 1 dk sonra tekrar dene — durum BİLİNMİYOR.</div>'});
+    }).catch(function(){out.innerHTML='<div class="item yel">Kaynak meşgul. 1 dk sonra tekrar dene — durum BİLİNMİYOR.</div>'});
+  }
+  /* portföy */
+  var pg=q('portgo');if(pg)pg.addEventListener('click',function(){
+    var syms=[];(q('port').value||'').toUpperCase().split(/[\s,;\n]+/).filter(Boolean).forEach(function(s){if(syms.indexOf(s)<0&&syms.length<15)syms.push(s)});
+    scanSyms(syms,q('portres'));});
+  /* cüzdan tarama (Ethereum — Blockscout keysiz) */
+  var wg=q('wgo');if(wg)wg.addEventListener('click',function(){
+    var a=(q('waddr').value||'').trim(),out=q('wres');
+    if(!/^0x[a-fA-F0-9]{40}$/.test(a)){out.innerHTML='<div class="item yel">geçerli bir Ethereum adresi değil (0x ile başlar, 42 karakter)</div>';return;}
+    out.innerHTML='<div class="item mut">cüzdan okunuyor… (sadece görüntüleme, yetki YOK)</div>';
+    fetch('https://eth.blockscout.com/api/v2/addresses/'+a+'/token-balances').then(function(r){return r.json()}).then(function(items){
+      if(!Array.isArray(items)||!items.length){out.innerHTML='<div class="item mut">Bu adreste token görünmüyor (ya da sadece ETH var).</div>';return;}
+      var withVal=items.map(function(it){var t=it.token||{},dec=parseInt(t.decimals||'18'),v=Number(it.value||0)/Math.pow(10,dec),rate=Number(t.exchange_rate||0);
+        return {sym:(t.symbol||'').toUpperCase(),usd:v*rate};}).filter(function(x){return x.sym&&x.sym.length<=10});
+      withVal.sort(function(a,b){return b.usd-a.usd});
+      var syms=[];withVal.forEach(function(x){if(syms.indexOf(x.sym)<0&&syms.length<12)syms.push(x.sym)});
+      scanSyms(syms,out);
+    }).catch(function(){out.innerHTML='<div class="item yel">Cüzdan verisi alınamadı — kaynak meşgul olabilir, 1 dk sonra dene. Durum: BİLİNMİYOR.</div>'});
+  });
+  /* link/metin tarama */
+  var lg=q('lgo');if(lg)lg.addEventListener('click',function(){
+    var t=(q('ltxt').value||''),out=q('lres');
+    var found=[],m;
+    var dolarli=t.match(/\$([A-Za-z0-9]{2,8})/g)||[];
+    dolarli.forEach(function(x){var s=x.slice(1).toUpperCase();if(found.indexOf(s)<0&&STOPW.indexOf(s)<0)found.push(s)});
+    (t.toUpperCase().match(/\b[A-Z0-9]{2,8}\b/g)||[]).forEach(function(s){if(found.length<8&&found.indexOf(s)<0&&STOPW.indexOf(s)<0&&!/^\d+$/.test(s)&&!/0X/.test(s))found.push(s)});
+    var cons=t.match(/0x[a-fA-F0-9]{40}/g)||[];
+    function afterContracts(){scanSyms(found.slice(0,10),out)}
+    if(cons.length){out.innerHTML='<div class="item mut">kontrat çözülüyor…</div>';
+      var i=0;(function next(){if(i>=Math.min(cons.length,3)){afterContracts();return;}
+        var c=cons[i++];
+        fetch('https://api.coingecko.com/api/v3/coins/ethereum/contract/'+c).then(function(r){return r.json()}).then(function(d){
+          if(d&&d.symbol){var s=d.symbol.toUpperCase();if(found.indexOf(s)<0)found.unshift(s);next();}
+          else return fetch('https://api.coingecko.com/api/v3/coins/binance-smart-chain/contract/'+c).then(function(r){return r.json()}).then(function(d2){if(d2&&d2.symbol){var s2=d2.symbol.toUpperCase();if(found.indexOf(s2)<0)found.unshift(s2);}next();});
+        }).catch(next);})();
+    } else afterContracts();
   });
 })();
 
