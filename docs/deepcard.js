@@ -96,6 +96,16 @@
       f += qa('🔮 Fiyatı yükselir mi, geleceği ne?', 'Bunu <b>KİMSE bilemez</b> — "kesin yükselir" diyen yalan söylüyor. Biz geleceği tahmin etmeyiz, sadece BUGÜNKÜ riski gösteririz. Karar ve sorumluluk sana aittir 🤝');
       h += '<div class="card"><h2>❓ Sık Sorulan Sorular</h2>' + f + '</div>';
       box.innerHTML = h;
+      /* AI Laboratuvarı: bu coin bayraklıysa yapay zeka yorumunu en üste ekle (30 dk'da bir motor üretir) */
+      fetch('/data/ai_yorum.json').then(function (r) { return r.json(); }).then(function (a) {
+        var c = a && a.coins && a.coins[sym];
+        if (!c) return;
+        var div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = '<h2>🤖 AI Laboratuvarı yorumu</h2><p style="font-size:14px">' + esc(c) + '</p>'
+          + '<p class="mut" style="font-size:11px;margin-top:6px">' + esc((a.model || 'AI') + ' · ' + (a.ts || '')) + ' · fiyat tahmini yapmaz · yatırım tavsiyesi değildir</p>';
+        box.insertBefore(div, box.firstChild);
+      }).catch(function () {});
     }
   }
   window.GXDeep = GXDeep;

@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819d';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819e';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -189,6 +189,20 @@ body{top:0!important}
   <div class="panel"><div class="phead"><span class="dot"></span>DELIST_RADARI :: resmî borsa duyuruları</div><div class="pbody" id="delist"><div class="item mut">bağlanıyor…</div></div></div>
   <div class="panel"><div class="phead"><span class="dot"></span>ALARM_AGI :: depeg / funding / open-interest</div><div class="pbody" id="risk"><div class="item mut">bağlanıyor…</div></div></div>
   <div class="panel"><div class="phead"><span class="dot"></span>ARKEOLOJI :: geçmişin ölçümü — tahmin değil</div><div class="pbody" id="ark"><div class="item mut">günlük analiz bekleniyor…</div></div></div>
+
+  <div class="panel"><div class="phead"><span class="dot"></span>🤖 AI LABORATUVARI :: yapay zeka bulgu analizi — 30 dk'da bir yenilenir</div><div class="pbody" id="ailab"><div class="item mut">AI analizi yükleniyor…</div></div></div>
+  <script>
+  (function(){var el=document.getElementById('ailab');
+  fetch('./data/ai_yorum.json').then(function(r){return r.json()}).then(function(a){
+    if(!a||!a.genel){el.innerHTML='<div class="item mut">ilk AI analizi motorun bir sonraki turunda gelecek (en geç 30 dk)</div>';return;}
+    var h='<div class="item" style="line-height:1.6">🧠 '+String(a.genel).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})+'</div>';
+    var cs=a.coins||{},ks=Object.keys(cs);
+    if(ks.length){h+='<div class="item mut" style="margin-top:6px">Bayraklı coinler için AI yorumu:</div>';
+      ks.slice(0,12).forEach(function(k){h+='<div class="item" style="font-size:13px">• <b class="yel">'+k.replace(/[&<>]/g,'')+'</b> — '+String(cs[k]).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})+'</div>';});}
+    h+='<div class="item mut" style="font-size:11px;margin-top:6px">// '+(a.model||'AI')+' · '+(a.ts||'')+' · AI yorumu kanıt-bayraklarını açıklar, fiyat tahmini yapmaz · yatırım tavsiyesi değildir</div>';
+    el.innerHTML=h;
+  }).catch(function(){el.innerHTML='<div class="item mut">AI analizi şu an yüklenemedi</div>'});})();
+  </script>
 
   <section id="pro">
     <div class="ttl">GALAXSI Pro — Üyelik</div>
