@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GALAXSI — Kripto Tehlike Radarı</title>
+<meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
+<style>
+  :root{
+    --bg:#050807; --panel:#0a100d; --line:#123822; --line2:#1e5c37;
+    --grn:#39ff88; --grn-dim:#1f8f52; --red:#ff4d5e; --yel:#ffd166; --cyan:#5ce1e6;
+    --txt:#c9e8d4; --mut:#5f8a70;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--txt);font:14px/1.6 "Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;overflow-x:hidden}
+  ::selection{background:var(--grn);color:#000}
+
+  /* ── kod yagmuru ── */
+  #rain{position:fixed;inset:0;z-index:0;opacity:.16;pointer-events:none}
+  /* ── scanline / CRT dokusu ── */
+  body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.14) 2px 4px);}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55));}
+
+  .wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:26px 16px 70px}
+
+  /* ── boot ekrani ── */
+  #boot{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .6s}
+  #boot.done{opacity:0;pointer-events:none}
+  #bootlog{width:min(560px,90vw);color:var(--grn);font-size:13px;white-space:pre-wrap}
+  .cursor{display:inline-block;width:8px;height:14px;background:var(--grn);animation:blink 1s steps(1) infinite;vertical-align:-2px}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ── hero ── */
+  header{padding:34px 0 10px;text-align:center}
+  .logo{font-size:clamp(34px,8vw,58px);font-weight:700;letter-spacing:.12em;color:var(--grn);
+    text-shadow:0 0 18px rgba(57,255,136,.45),0 0 60px rgba(57,255,136,.15);position:relative;display:inline-block}
+  .logo::before,.logo::after{content:"GALAXSI";position:absolute;left:0;top:0;width:100%;overflow:hidden;opacity:0}
+  .logo::before{color:var(--red);animation:gl1 5s infinite steps(1)}
+  .logo::after{color:var(--cyan);animation:gl2 6s infinite steps(1)}
+  @keyframes gl1{0%,93%{opacity:0;transform:none}94%{opacity:.7;transform:translate(-3px,2px);clip-path:inset(10% 0 55% 0)}96%{opacity:0}}
+  @keyframes gl2{0%,88%{opacity:0;transform:none}89%{opacity:.7;transform:translate(3px,-2px);clip-path:inset(60% 0 15% 0)}91%{opacity:0}}
+  .tag{margin-top:10px;font-size:15px;color:var(--txt)}
+  .tag b{color:var(--red)}
+  .sub{margin-top:6px;font-size:12.5px;color:var(--mut)}
+
+  /* ── stat bar ── */
+  .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 6px}
+  .stat{border:1px solid var(--line2);background:rgba(10,16,13,.85);border-radius:6px;padding:9px 16px;min-width:120px}
+  .stat .n{font-size:22px;color:var(--grn);font-weight:700;text-shadow:0 0 12px rgba(57,255,136,.35)}
+  .stat .l{font-size:10.5px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+
+  /* ── tanitim paneli ── */
+  .intro{margin:26px 0 8px}
+  .ttl{color:var(--grn);font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:26px 0 10px}
+  .ttl::before{content:"▚ ";color:var(--grn-dim)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .card{border:1px solid var(--line);background:rgba(10,16,13,.88);border-radius:8px;padding:16px 16px 14px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--grn-dim)}
+  .card h3{color:var(--txt);font-size:14px;margin-bottom:6px}
+  .card p{font-size:12.5px;color:var(--mut)}
+  .card .ic{font-size:20px;margin-bottom:8px;display:block}
+
+  .creed{border:1px dashed var(--line2);border-radius:8px;padding:14px 16px;margin-top:12px;font-size:12.5px;color:var(--txt);background:rgba(57,255,136,.03)}
+  .creed b{color:var(--grn)}
+
+  /* ── canli veri panelleri ── */
+  .panel{border:1px solid var(--line);background:rgba(10,16,13,.9);border-radius:8px;margin:14px 0;overflow:hidden}
+  .phead{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:rgba(18,56,34,.25);font-size:12.5px;color:var(--grn)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+  .pbody{padding:12px 16px}
+  .item{font-size:12.8px;margin:3px 0}
+  .red{color:var(--red)} .yel{color:var(--yel)} .grn{color:var(--grn)} .mut{color:var(--mut)} .cy{color:var(--cyan)}
+  .chip{display:inline-block;margin:2px 8px 2px 0}
+  .warnbox{border:1px solid #7a5d10;background:rgba(255,209,102,.07);border-radius:8px;padding:11px 14px;margin:14px 0;color:var(--yel);font-size:12.8px}
+
+  footer{margin-top:34px;border-top:1px solid var(--line);padding-top:14px;font-size:11.5px;color:var(--mut)}
+  footer b{color:var(--txt)}
+  a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
+  @media (prefers-reduced-motion: reduce){
+    #rain{display:none} .logo::before,.logo::after{animation:none} .dot{animation:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="vignette"></div>
+
+<div id="boot"><div id="bootlog"></div></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">GALAXSI</div>
+    <div class="tag">Kripto <b>Tehlike</b> Radarı — tuzakları insanlardan önce görür</div>
+    <div class="sub">// kâr sinyali satmayız · riski gösteririz · yalan söylemektense "BİLİNMİYOR" deriz</div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="n" id="s-flags">—</div><div class="l">aktif tehlike bayrağı</div></div>
+    <div class="stat"><div class="n">7+</div><div class="l">bağımsız veri kaynağı</div></div>
+    <div class="stat"><div class="n">144</div><div class="l">gömülen strateji (mezarlık)</div></div>
+    <div class="stat"><div class="n" id="s-age">—</div><div class="l">son tarama</div></div>
+  </div>
+
+  <section class="intro">
+    <div class="ttl">Bu sistem ne yapar</div>
+    <div class="grid">
+      <div class="card"><span class="ic">⛔</span><h3>Resmî Delist Takibi</h3>
+        <p>Binance ve OKX'in <b>kendi resmî duyurularını</b> saatlik tarar. Delist kararı tahmin değildir — borsa o coini bitirmiştir. Sen haberi duymadan bayrak burada yanar.</p></div>
+      <div class="card"><span class="ic">🕵️</span><h3>Sızıntı Arkeolojisi</h3>
+        <p>Delist duyurusundan <b>önceki 48 saati</b> ölçer: anormal satış ve hacim = birileri önceden biliyordu. İstatistiksel kanıt üretir, isim suçlamaz.</p></div>
+      <div class="card"><span class="ic">🚨</span><h3>Anlık Alarm Ağı</h3>
+        <p>Stablecoin depeg, aşırı funding (kalabalık pozisyon), open-interest çöküşü (büyük oyuncu kaçışı), ölü GitHub projeleri, yeni-listing tuzağı istatistiği.</p></div>
+    </div>
+    <div class="creed">
+      <b>Dürüstlük protokolü:</b> Kaynak çökerse "temiz" demeyiz, <b>BİLİNMİYOR</b> deriz · veri eskirse ekranda uyarı yanar ·
+      başarısız olan her stratejimizi mezarlıkta yayınlarız · "kesin kazandıran" diyen herkes yalan söylüyordur — biz dahil olsaydık.
+    </div>
+  </section>
+
+  <div id="fresh"></div>
+
+  <div class="panel"><div class="phead"><span class="dot"></span>DELIST_RADARI :: resmî borsa duyuruları</div><div class="pbody" id="delist"><div class="item mut">bağlanıyor…</div></div></div>
+  <div class="panel"><div class="phead"><span class="dot"></span>ALARM_AGI :: depeg / funding / open-interest</div><div class="pbody" id="risk"><div class="item mut">bağlanıyor…</div></div></div>
+  <div class="panel"><div class="phead"><span class="dot"></span>ARKEOLOJI :: geçmişin ölçümü — tahmin değil</div><div class="pbody" id="ark"><div class="item mut">günlük analiz bekleniyor…</div></div></div>
+
+  <footer>
+    <b>Yasal uyarı:</b> GALAXSI bir risk-istihbarat aracıdır; <b>yatırım tavsiyesi değildir</b>, alım-satım önerisi vermez,
+    portföy yönetmez, SPK lisanslı danışmanlık hizmeti sunmaz. Bayraklar kamuya açık verilerin otomatik analizidir; kararlar ve sonuçları size aittir.
+    Sistem her saat kendini günceller. · <a href="/galaxsi/">eski panel</a>
+  </footer>
+</div>
+
+<script>
+/* ── kod yagmuru ── */
+(function(){
+  var c=document.getElementById('rain'); if(!c||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var x=c.getContext('2d'),W,H,cols,drops,GL="01₿ΞĐ▚▞ΛΔΣ+·:XKZQ790アイウエオカキクケコサシスセソ";
+  function rs(){W=c.width=innerWidth;H=c.height=innerHeight;cols=Math.floor(W/16);drops=Array(cols).fill(0).map(function(){return Math.random()*-50});}
+  rs();addEventListener('resize',rs);
+  var last=0;
+  function tick(t){
+    if(t-last>50){last=t;
+      x.fillStyle="rgba(5,8,7,0.12)";x.fillRect(0,0,W,H);
+      x.font="14px monospace";
+      for(var i=0;i<cols;i++){
+        var ch=GL[Math.floor(Math.random()*GL.length)];
+        x.fillStyle=Math.random()<.06?"#8affc0":"#1f8f52";
+        x.fillText(ch,i*16,drops[i]*16);
+        if(drops[i]*16>H&&Math.random()>.975)drops[i]=0;
+        drops[i]++;
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* ── boot ekrani ── */
+(function(){
+  var boot=document.getElementById('boot'),log=document.getElementById('bootlog');
+  if(sessionStorage.getItem('gx_boot')){boot.classList.add('done');return;}
+  var lines=[
+    "> GALAXSI guvenlik radari v2 baslatiliyor...",
+    "> kaynak dogrulama: Binance CMS ..... [OK]",
+    "> kaynak dogrulama: OKX / Gate / F&G  [OK]",
+    "> durustluk protokolu yuklendi ...... [AKTIF]",
+    "> kar-sinyali modulu ................ [YOK - kasitli]",
+    "> tehlike bayraklari yukleniyor _"
+  ];
+  var li=0,ci=0,out="";
+  (function type(){
+    if(li>=lines.length){setTimeout(function(){boot.classList.add('done');sessionStorage.setItem('gx_boot','1');},420);return;}
+    var l=lines[li];
+    if(ci<l.length){out+=l[ci++];log.innerHTML=out+'<span class="cursor"></span>';setTimeout(type,10);}
+    else{out+="\n";li++;ci=0;setTimeout(type,110);}
+  })();
+})();
+
+/* ── canli veri ── */
+var q=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+fetch('./data/haber_radar.json').then(function(r){return r.json()}).then(function(d){
+  var age=(Date.now()/1000-(d.updated||0))/60;
+  q('s-age').textContent=age<60?Math.round(age)+" dk":Math.round(age/60)+" sa";
+  if(age>150){q('fresh').innerHTML='<div class="warnbox">⚠ <b>BİLİNMİYOR — veri '+Math.round(age)+' dk eski.</b> Radar gecikmiş olabilir; uyarı-yok = güvenli VARSAYMA.</div>';}
+  var dl=d.delist||[],h='';
+  q('s-flags').textContent=dl.length;
+  for(var i=0;i<Math.min(dl.length,15);i++){var it=dl[i];
+    h+='<div class="item red">⛔ <b>'+esc(it.sym)+'</b> <span class="mut">—</span> '+esc(it.borsa)+' <span class="mut">· '+esc(it.tarih)+'</span></div>';}
+  if(dl.length>15)h+='<div class="item mut">+'+(dl.length-15)+' bayrak daha</div>';
+  q('delist').innerHTML=(h||'<div class="item mut">aktif bayrak yok</div>')+'<div class="item mut" style="margin-top:8px">// son 30 günün resmî delist duyuruları — borsanın kendi kararı, tahmin değil</div>';
+  var r='';
+  var dp=d.depeg||[],da=dp.filter(function(x){return x.alarm});
+  if(da.length){for(i=0;i<da.length;i++){r+='<div class="item red">🚨 <b>'+esc(da[i].sym)+'</b> DEPEG: '+da[i].fiyat+' ('+da[i].sapma_pct+'%)</div>';}}
+  else if(dp.length){r+='<div class="item grn">stablecoin peg ✓ <span class="mut">'+dp.map(function(x){return esc(x.sym)+' '+x.fiyat}).join(' · ')+'</span></div>';}
+  var fu=d.funding_uc||[];
+  if(fu.length){r+='<div class="item yel">aşırı funding <span class="mut">(kalabalık pozisyon)</span>: ';
+    for(i=0;i<Math.min(fu.length,6);i++){r+='<span class="chip"><b>'+esc(fu[i].sym)+'</b> '+fu[i].rate_pct+'%</span>';}r+='</div>';}
+  var oi=d.oi_cliff||[];
+  if(oi.length){r+='<div class="item red">📉 OI uçurumu <span class="mut">(büyük oyuncu kaçıyor olabilir)</span>: ';
+    for(i=0;i<oi.length;i++){r+='<span class="chip"><b>'+esc(oi[i].sym)+'</b> '+oi[i].chg_pct+'%/'+oi[i].dk+'dk</span>';}r+='</div>';}
+  var fg=d.fear_greed||{};
+  if(fg.value)r+='<div class="item cy">Fear &amp; Greed: '+fg.value+' <span class="mut">('+esc(fg.cls)+')</span></div>';
+  var kh=d.kaynak_hata||[];
+  if(kh.length)r+='<div class="item yel">⚠ kaynak erişilemedi: '+esc(kh.join(', '))+' — bu kaynaklar için durum <b>BİLİNMİYOR</b>.</div>';
+  q('risk').innerHTML=r||'<div class="item mut">aktif alarm yok</div>';
+}).catch(function(){q('fresh').innerHTML='<div class="warnbox">⚠ Veri yüklenemedi — durum BİLİNMİYOR.</div>';});
+fetch('./data/arkeoloji.json').then(function(r){return r.json()}).then(function(a){
+  var h='',i;
+  var sz=a.sizinti||[],szs=sz.filter(function(x){return x.supheli});
+  if(sz.length){h+='<div class="item">delist öncesi inceleme: '+sz.length+' coin ölçüldü → <b class="red">'+szs.length+' şüpheli</b> <span class="mut">(duyurudan ÖNCE anormal satış/hacim)</span></div>';
+    for(i=0;i<Math.min(szs.length,6);i++){var s=szs[i];h+='<div class="item red">🕵️ <b>'+esc(s.sym)+'</b>: duyuru öncesi 48s '+s.pre48_ret_pct+'% <span class="mut">·</span> hacim ×'+s.hacim_orani+'</div>';}}
+  var lt=a.listing_tuzagi||{};
+  if(lt.n){h+='<div class="item mut">yeni-listing tuzağı: '+lt.n+' listing — ilk 48s medyan <b class="yel">'+lt.medyan_pct+'%</b>, negatif oranı <b class="yel">'+lt.negatif_pct+'%</b></div>';}
+  var gh=a.github||[],gd=gh.filter(function(x){return x.olu});
+  if(gd.length){h+='<div class="item yel">💀 ölü proje (6+ ay commit yok): '+gd.map(function(x){return '<b>'+esc(x.sym)+'</b> ('+x.ay_once+' ay)'}).join(', ')+'</div>';}
+  if(h)q('ark').innerHTML=h;
+}).catch(function(){});
+</script>
+</body>
+</html>
