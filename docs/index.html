@@ -6,6 +6,10 @@
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
+<script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
+(function(){try{var GX_VER='20260819b';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
 <meta property="og:title" content="GALAXSI — Kripto Tehlike Radarı">
 <meta property="og:description" content="Tuzakları insanlardan önce görür. 17.000+ coin risk taraması · resmî delist takibi · cüzdan taraması · anlık Telegram alarmı. Kâr sinyali satmaz; riski gösterir.">
@@ -329,7 +333,15 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
     var atl=(md.atl||{}).usd,atlc=(md.atl_change_percentage||{}).usd,atld=(md.atl_date||{}).usd;
     var hi=(md.high_24h||{}).usd,lo=(md.low_24h||{}).usd,fdv=(md.fully_diluted_valuation||{}).usd;
     var circ=md.circulating_supply,maxs=md.max_supply,tot=md.total_supply;
-    var cat=(d.categories||[]).filter(Boolean)[0]||'-';
+    /* akilli kategori: CoinGecko sirasi guvenilmez (DOGE'ye 'Smart Contract Platform' diyor).
+       kimlik etiketlerini (Meme/Dog-Themed/AI/DeFi...) one al, endeks/ekosistem etiketlerini ele. */
+    function catScore(x){if(/Index|GMCI|Ecosystem|Portfolio|Market Cap/i.test(x))return -1;
+      if(/^(Meme|Dog-Themed|Cat-Themed|Stablecoin|Artificial Intelligence|AI |GameFi|Gaming|DeFi|Decentralized Finance|NFT|Non-Fungible|Real World Assets|RWA|Privacy|Exchange-based|DePIN|Liquid Staking)/i.test(x))return 5;
+      if(/Smart Contract Platform|Layer 1|Layer 2/i.test(x))return 3;
+      if(/Proof of/i.test(x))return 1;return 2;}
+    var catsSorted=(d.categories||[]).filter(Boolean).slice().sort(function(a,b){return catScore(b)-catScore(a)});
+    var cat=catsSorted.slice(0,2).join(' · ')||'-';
+    var catFull=catsSorted.slice(0,4).join(', ')||'-';
     var yas=yasHesap(d.genesis_date);
     var gy=d.genesis_date?d.genesis_date.slice(0,4):(athd?(''+athd).slice(0,4):null);
     var nEx=(d.tickers||[]).length;
@@ -380,7 +392,7 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
       for(i=0;i<good.length;i++)h+='<div class="rrow"><span class="v grn" style="text-align:left;font-weight:400">'+good[i]+'</span></div>';h+='</div>';}
 
     h+='<div class="rsec"><div class="h">🪪 KİMLİK & TARİHÇE</div>'
-      +'<div class="rrow"><span class="k">Kategori</span><span class="v">'+esc(cat)+'</span></div>'
+      +'<div class="rrow"><span class="k">Kategori</span><span class="v">'+esc(catFull)+'</span></div>'
       +'<div class="rrow"><span class="k">Piyasa sıralaması</span><span class="v">'+(rank?'#'+rank:'yok ⚠')+'</span></div>'
       +'<div class="rrow"><span class="k">Çıkış · yaş</span><span class="v">'+(gy?gy+' · ':'')+ageT()+'</span></div>'
       +'<div class="rrow"><span class="k">🔺 Zirve (ATH)</span><span class="v">'+(athp!=null?(athp<0.01?'$'+athp.toFixed(6):fmtUsd(athp)):'-')+' <span class="mut">('+dt(athd)+')</span></span></div>'
