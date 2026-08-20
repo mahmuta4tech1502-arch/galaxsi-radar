@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819w';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819x';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -799,6 +799,42 @@ fetch('./data/arkeoloji.json').then(function(r){return r.json()}).then(function(
     /* görüldü işaretle (bu ziyaretin sayacı gösterildi, sonrasını sıfırla) */
     try{localStorage.setItem(SEEN,String(top.ts));}catch(e){}
   }).catch(function(){var f=document.getElementById('duyFeed');if(f)f.innerHTML='<div class="item mut">duyurular yüklenemedi — birazdan yenile.</div>';});
+})();
+</script>
+<style>
+#gala{position:fixed;right:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+#galaBubble{max-width:238px;background:#0a100d;border:1px solid var(--line2);border-radius:14px 14px 4px 14px;padding:12px 14px;box-shadow:0 8px 26px rgba(0,0,0,.55);display:none}
+#galaBubble.on{display:block;animation:galaPop .28s ease}
+@keyframes galaPop{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+#galaBubble .t{color:var(--txt);font-size:13.5px;line-height:1.5}
+#galaBubble .t b{color:var(--grn)}
+#galaBubble .row{display:flex;gap:6px;margin-top:10px;align-items:center}
+#galaBubble .b{background:var(--grn);color:#04140b;border:0;border-radius:7px;padding:7px 13px;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:none}
+#galaBubble .x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:12px;padding:4px;margin-left:auto}
+#galaAv{width:66px;height:66px;border-radius:50%;border:2px solid var(--grn);box-shadow:0 0 18px rgba(57,255,136,.45),0 4px 12px rgba(0,0,0,.5);cursor:pointer;object-fit:cover;object-position:center top;background:#0a100d;transition:transform .2s}
+#galaAv:hover{transform:scale(1.07)}
+#galaTag{position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);background:var(--grn);color:#04140b;font-size:9px;font-weight:700;padding:1px 7px;border-radius:8px;pointer-events:none;letter-spacing:.04em}
+@media(max-width:600px){#galaAv{width:56px;height:56px}#galaBubble{max-width:200px;font-size:13px}}
+</style>
+<div id="gala">
+  <div id="galaBubble">
+    <div class="t"><b>Merhaba, ben Gala! 👋</b><br>GALAXSI'nin radar asistanıyım. Bir coin güvenli mi merak ediyorsan, adını yaz — tuzak var mı beraber bakalım.</div>
+    <div class="row">
+      <a href="#tara" class="b" onclick="galaHide()">🔍 Coin Tara</a>
+      <button class="x" onclick="galaHide(1)">kapat</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <img id="galaAv" src="/gala_avatar.jpg" alt="Gala — GALAXSI radar asistanı" onclick="galaToggle()">
+    <span id="galaTag">GALA</span>
+  </div>
+</div>
+<script>
+(function(){var b=document.getElementById('galaBubble');
+  window.galaToggle=function(){b.classList.toggle('on');};
+  window.galaHide=function(perm){b.classList.remove('on');if(perm){try{localStorage.setItem('gala_hi',String(Date.now()));}catch(e){}}};
+  var last=0;try{last=parseInt(localStorage.getItem('gala_hi')||'0',10);}catch(e){}
+  if(Date.now()-last>20*3600*1000){setTimeout(function(){b.classList.add('on');},2600);}
 })();
 </script>
 </body>
