@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819o';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819p';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -132,6 +132,29 @@ body{top:0!important}
 
   footer{margin-top:34px;border-top:1px solid var(--line);padding-top:14px;font-size:11.5px;color:var(--mut)}
   footer b{color:var(--txt)}
+  /* ── Duyurular / Gelişmeler ── */
+  .duy-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#0c2f1c,#0a100d);border:1px solid var(--line2);border-radius:10px;padding:10px 14px;margin:0 0 16px}
+  .duy-pulse{animation:duypulse 1.4s infinite;font-size:16px}
+  @keyframes duypulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.18)}}
+  .duy-banner-text{color:var(--txt);font-weight:600;font-size:14px;flex:1;text-decoration:none}
+  .duy-banner-text:hover{color:var(--grn)}
+  .duy-x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:16px;padding:2px 4px}
+  .duy-badge{background:var(--red);color:#fff;font-size:11px;padding:1px 8px;border-radius:20px;vertical-align:middle;margin-left:6px}
+  .duy-feed{display:flex;flex-direction:column;gap:10px}
+  .duy-card{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;position:relative;transition:border-color .2s}
+  .duy-card:hover{border-color:var(--line2)}
+  .duy-card .em{font-size:24px;line-height:1.1}
+  .duy-card .bd{flex:1;min-width:0}
+  .duy-card .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .duy-card h4{font-size:15px;color:var(--txt);margin:0}
+  .duy-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px}
+  .duy-t-feature{background:#123822;color:var(--grn)}
+  .duy-t-delist{background:#3a1015;color:#ff8090}
+  .duy-t-system{background:#0e2a30;color:var(--cyan)}
+  .duy-t-milestone{background:#2e2510;color:var(--yel)}
+  .duy-card p{font-size:13px;color:var(--txt);opacity:.82;margin:5px 0 0;line-height:1.5}
+  .duy-card .tm{font-size:11px;color:var(--mut);margin-top:5px}
+  .duy-new{position:absolute;top:10px;right:12px;font-size:9.5px;font-weight:700;color:#04140b;background:var(--grn);padding:1px 7px;border-radius:20px;animation:duypulse 1.6s infinite}
   a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
   input#ci{flex:1;min-width:180px;background:#050807;border:1px solid var(--line2);border-radius:6px;padding:11px 13px;color:var(--grn);font:inherit;outline:none}
   button#cb{background:var(--grn);color:#04140b;border:0;border-radius:6px;padding:11px 22px;font:inherit;font-weight:700;cursor:pointer;letter-spacing:.06em}
@@ -159,12 +182,24 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
     </div>
   </header>
 
+  <div id="duyBanner" class="duy-banner" style="display:none">
+    <span class="duy-pulse">🆕</span>
+    <a href="#duyurular" id="duyBannerText" class="duy-banner-text"></a>
+    <button class="duy-x" onclick="duyDismiss()" title="kapat">✕</button>
+  </div>
+
   <div class="stats">
     <div class="stat"><div class="n" id="s-flags">—</div><div class="l">aktif tehlike bayrağı</div></div>
     <div class="stat"><div class="n">17K+</div><div class="l">taranabilir coin</div></div>
     <div class="stat"><div class="n">7+</div><div class="l">bağımsız veri kaynağı</div></div>
     <div class="stat"><div class="n" id="s-age">—</div><div class="l">son tarama</div></div>
   </div>
+
+  <section id="duyurular">
+    <div class="ttl">📢 Duyurular &amp; Gelişmeler <span id="duyBadge" class="duy-badge" style="display:none"></span></div>
+    <div class="item mut" style="margin-bottom:12px">// yeni özellikler, kritik bayraklar ve sistem haberleri — <b class="grn">otomatik</b> güncellenir</div>
+    <div id="duyFeed" class="duy-feed"><div class="item mut">yükleniyor…</div></div>
+  </section>
 
   <section>
     <div class="ttl">Bu sistem ne yapar</div>
@@ -277,8 +312,8 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
     <div class="grid">
       <div class="card"><span class="ic">💬</span><h3>Genel Forum</h3><p>Herkese açık konu-odaları: coin tartışmaları, tuzak ihbarları, resim/grafik paylaşımı, istediğin odayı aç.</p>
         <a id="cbForum" class="btn btn-g" style="margin-top:10px;display:inline-block;opacity:.5;pointer-events:none">⏳ Kuruluyor…</a></div>
-      <div class="card"><span class="ic">📢</span><h3>Duyurular</h3><p>Yeni özellikler, kritik bayraklar ve sistem haberleri — tek yönlü, temiz akış.</p>
-        <a id="cbDuyuru" class="btn btn-g" style="margin-top:10px;display:inline-block;opacity:.5;pointer-events:none">⏳ Kuruluyor…</a></div>
+      <div class="card"><span class="ic">📢</span><h3>Duyurular</h3><p>Yeni özellikler, kritik bayraklar ve sistem haberleri — <b class="grn">canlı akış, otomatik güncellenir.</b></p>
+        <a href="#duyurular" class="btn btn-g" style="margin-top:10px;display:inline-block">📢 Duyuruları Gör →</a></div>
       <div class="card"><span class="ic">𝕏</span><h3>X (Twitter)</h3><p>Günlük tehlike bayrakları, delist duyuruları ve sistem haberleri — bizi X'te takip et, ilk sen gör.</p>
         <a href="https://x.com/RsDunyas" target="_blank" rel="me noopener" class="btn btn-g" style="margin-top:10px;display:inline-block">𝕏 Takip Et → @RsDunyas</a></div>
       <div class="card"><span class="ic">🔒</span><h3>Pro Özel Oda</h3><p>Sadece üyeler: anlık alarmlar, derin analiz paylaşımları, öncelikli destek.</p>
@@ -662,5 +697,42 @@ fetch('./data/arkeoloji.json').then(function(r){return r.json()}).then(function(
   if(h)q('ark').innerHTML=h;
 }).catch(function(){});
 </script>
-<script>try{fetch('https://galaxsi-stats.a4techmazlum.workers.dev/hit',{mode:'no-cors',cache:'no-store'})}catch(e){}</script></body>
+<script>try{fetch('https://galaxsi-stats.a4techmazlum.workers.dev/hit',{mode:'no-cors',cache:'no-store'})}catch(e){}</script><script>
+/* ── Duyurular / Gelişmeler feed'i (canlı, otomatik) ── */
+(function(){
+  var SEEN='gx_duy_seen', DISM='gx_duy_bx';
+  var TR={feature:'YENİ',delist:'KRİTİK',system:'SİSTEM',milestone:'KİLOMETRE TAŞI'};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function rel(ts){var s=Math.floor(Date.now()/1000)-ts;if(s<60)return'az önce';if(s<3600)return Math.floor(s/60)+' dk önce';if(s<86400)return Math.floor(s/3600)+' saat önce';var d=Math.floor(s/86400);return d===1?'dün':d+' gün önce';}
+  window.duyDismiss=function(){var b=document.getElementById('duyBanner');if(b)b.style.display='none';var it=window.__duyTop;if(it)try{localStorage.setItem(DISM,String(it));}catch(e){}};
+  fetch('/data/duyurular.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+    var items=(d.items||[]).slice().sort(function(a,b){return b.ts-a.ts;});
+    if(!items.length)return;
+    var top=items[0]; window.__duyTop=top.ts;
+    var seen=parseInt(localStorage.getItem(SEEN)||'0',10);
+    var dism=parseInt(localStorage.getItem(DISM)||'0',10);
+    var unread=items.filter(function(x){return x.ts>seen;}).length;
+    /* banner: en yeni, dismiss edilmemişse */
+    if(top.ts>dism){
+      var tx=document.getElementById('duyBannerText'), bn=document.getElementById('duyBanner');
+      if(tx&&bn){tx.textContent=(top.emoji||'📢')+' '+top.baslik;bn.style.display='flex';}
+    }
+    /* okunmadı rozeti */
+    if(unread>0){var bg=document.getElementById('duyBadge');if(bg){bg.textContent=unread+' yeni';bg.style.display='inline-block';}}
+    /* feed */
+    var now=Math.floor(Date.now()/1000);
+    var html=items.map(function(x){
+      var isNew=(now-x.ts)<3*86400, tag=x.etiket||TR[x.type]||'', ty=x.type||'system';
+      return '<div class="duy-card">'+(isNew?'<span class="duy-new">🆕 YENİ</span>':'')
+        +'<span class="em">'+esc(x.emoji||'📢')+'</span><div class="bd"><div class="hd">'
+        +'<h4>'+esc(x.baslik)+'</h4>'+(tag?'<span class="duy-tag duy-t-'+ty+'">'+esc(tag)+'</span>':'')
+        +'</div><p>'+esc(x.metin)+'</p><div class="tm">'+rel(x.ts)+'</div></div></div>';
+    }).join('');
+    document.getElementById('duyFeed').innerHTML=html;
+    /* görüldü işaretle (bu ziyaretin sayacı gösterildi, sonrasını sıfırla) */
+    try{localStorage.setItem(SEEN,String(top.ts));}catch(e){}
+  }).catch(function(){var f=document.getElementById('duyFeed');if(f)f.innerHTML='<div class="item mut">duyurular yüklenemedi — birazdan yenile.</div>';});
+})();
+</script>
+</body>
 </html>
