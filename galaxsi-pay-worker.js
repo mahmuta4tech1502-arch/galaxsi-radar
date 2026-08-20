@@ -16,9 +16,10 @@
    ============================================================================ */
 
 const PLANS = [
-  { min: 600, name: "1 Yıl", days: 365 },
-  { min: 80, name: "30 Gün", days: 30 },
-  { min: 0, name: "7 Gün", days: 7 },
+  { min: 20, name: "🦉 Baş Dedektif (30 Gün)", days: 30 },
+  { min: 8, name: "📡 Radar Pro (30 Gün)", days: 30 },
+  { min: 4, name: "🛡️ Haftalık Kalkan (7 Gün)", days: 7 },
+  { min: 0, name: "⚡ Gün Nöbeti (24 Saat)", days: 1 },
 ];
 
 function planFromAmount(amount) {
