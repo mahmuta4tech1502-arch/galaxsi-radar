@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819j';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819k';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -373,7 +373,7 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
     var nEx=(d.tickers||[]).length;
     var down=d.sentiment_votes_down_percentage,up=d.sentiment_votes_up_percentage;
     var commits=dev.commit_count_4_weeks,stars=dev.stars,forks=dev.forks,contrib=dev.pull_request_contributors,issues=dev.total_issues;
-    var tw=com.twitter_followers,rd=com.reddit_subscribers,tg=com.telegram_channel_user_count;
+    var tw=com.twitter_followers,rd=com.reddit_subscribers,tg=com.telegram_channel_user_count,wl=d.watchlist_portfolio_users;
     var home=((d.links||{}).homepage||[]).filter(Boolean)[0]||'';
     var desc=strip((d.description||{}).en); if(desc.length>300)desc=desc.slice(0,300).replace(/\s\S*$/,'')+'…';
     function ageT(){return yas==null?'-':(yas>=12?(yas/12).toFixed(1)+' yıl':yas+' ay')}
@@ -445,15 +445,18 @@ function yasHesap(g){if(!g)return null;var d=new Date(g),now=new Date(2026,7,19)
 
     h+='<div class="rsec"><div class="h">🪙 ARZ</div>'
       +'<div class="rrow"><span class="k">Dolaşan arz</span><span class="v">'+fmtNum(circ)+' '+esc(sym)+'</span></div>'
-      +'<div class="rrow"><span class="k">Toplam arz</span><span class="v">'+(tot?fmtNum(tot):'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Maksimum arz</span><span class="v">'+(maxs?fmtNum(maxs):'sınırsız/belirsiz')+'</span></div>'
-      +'<div class="rrow"><span class="k">Dolaşımda oran</span><span class="v">'+(maxs&&circ?'%'+Math.round(circ/maxs*100):'-')+'</span></div></div>';
+      +'<div class="rrow"><span class="k">Toplam arz</span><span class="v">'+(tot?fmtNum(tot)+' '+esc(sym):'-')+'</span></div>'
+      +'<div class="rrow"><span class="k">Maksimum arz</span><span class="v">'+(maxs?fmtNum(maxs)+' '+esc(sym):'<span class="grn">Üst sınır yok</span> <span class="mut">(enflasyonist)</span>')+'</span></div>'
+      +'<div class="rrow"><span class="k">Dolaşımda oran</span><span class="v">'+(maxs&&circ?'%'+Math.round(circ/maxs*100)+' çıkarıldı':'<span class="mut">üst sınır yok</span>')+'</span></div></div>';
 
+    var socialR='';
+    if(tw)socialR+='<div class="rrow"><span class="k">Twitter takipçi</span><span class="v">'+fmtNum(tw)+'</span></div>';
+    if(rd)socialR+='<div class="rrow"><span class="k">Reddit üye</span><span class="v">'+fmtNum(rd)+'</span></div>';
+    if(tg)socialR+='<div class="rrow"><span class="k">Telegram üye</span><span class="v">'+fmtNum(tg)+'</span></div>';
     h+='<div class="rsec"><div class="h">👥 TOPLULUK</div>'
       +'<div class="rrow"><span class="k">Topluluk güveni</span><span class="v '+(up>=70?'grn':down>=60?'red':'yel')+'">'+(up!=null?'%'+Math.round(up)+' olumlu':'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Twitter takipçi</span><span class="v">'+(tw?fmtNum(tw):'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Reddit üye</span><span class="v">'+(rd?fmtNum(rd):'-')+'</span></div>'
-      +'<div class="rrow"><span class="k">Telegram üye</span><span class="v">'+(tg?fmtNum(tg):'-')+'</span></div></div>';
+      +'<div class="rrow"><span class="k">İzleyen (CoinGecko)</span><span class="v">'+(wl?fmtNum(wl)+' kişi':'-')+'</span></div>'
+      +socialR+'</div>';
 
     h+='<div class="rsec"><div class="h">🛠️ GELİŞTİRME — canlı mı, ölü mü?</div>'
       +'<div class="rrow"><span class="k">Durum</span><span class="v '+(commits>=20?'grn':commits>0?'yel':commits===0?'red':'mut')+'">'+devlbl+'</span></div>'

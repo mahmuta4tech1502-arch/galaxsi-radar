@@ -34,6 +34,7 @@
       var catFull = cats.slice(0, 4).join(', ') || '-';
       var commits = dev.commit_count_4_weeks, stars = dev.stars, forks = dev.forks;
       var tw = com.twitter_followers, rd = com.reddit_subscribers, tg = com.telegram_channel_user_count;
+      var wl = d.watchlist_portfolio_users;
       var up = d.sentiment_votes_up_percentage;
       var circ = md.circulating_supply, maxs = md.max_supply, tot = md.total_supply;
       var mc = usd(md.market_cap) || 0, vol = usd(md.total_volume) || 0;
@@ -57,17 +58,22 @@
         + row('200 gün', pct(md.price_change_percentage_200d))
         + row('1 yıl', pct(md.price_change_percentage_1y))
         + '</table></div>';
+      var maxTxt = maxs ? fnum(maxs) : '<span class="grn">Üst sınır yok</span> <span class="mut">(enflasyonist — sürekli yeni arz basılır)</span>';
+      var oranTxt = (maxs && circ) ? '%' + Math.round(circ / maxs * 100) + ' çıkarıldı' : '<span class="mut">üst sınır yok → oran hesaplanamaz</span>';
       h += '<div class="card"><h2>🪙 Arz</h2><table>'
         + row('Dolaşan arz', fnum(circ) + ' ' + esc(sym))
-        + row('Toplam arz', fnum(tot))
-        + row('Maksimum arz', maxs ? fnum(maxs) : 'sınırsız/belirsiz')
-        + row('Dolaşımda oran', (maxs && circ) ? '%' + Math.round(circ / maxs * 100) : '-')
+        + row('Toplam arz', fnum(tot) + ' ' + esc(sym))
+        + row('Maksimum arz', maxTxt)
+        + row('Dolaşımda oran', oranTxt)
         + '</table></div>';
+      var socialRows = '';
+      if (tw) socialRows += row('Twitter takipçi', fnum(tw));
+      if (rd) socialRows += row('Reddit üye', fnum(rd));
+      if (tg) socialRows += row('Telegram üye', fnum(tg));
       h += '<div class="card"><h2>👥 Topluluk &amp; 🛠️ Geliştirme</h2><table>'
-        + row('Topluluk güveni', up != null ? '%' + Math.round(up) + ' olumlu' : '-')
-        + row('Twitter takipçi', fnum(tw))
-        + row('Reddit üye', fnum(rd))
-        + row('Telegram üye', fnum(tg))
+        + row('Topluluk güveni', up != null ? '%' + Math.round(up) + ' olumlu (' + Math.round(100 - up) + ' olumsuz)' : '-')
+        + row('İzleyen (CoinGecko)', wl ? fnum(wl) + ' kişi takipte' : '-')
+        + socialRows
         + row('Geliştirme durumu', devlbl)
         + row('GitHub yıldız · fork', fnum(stars) + ' · ' + fnum(forks))
         + '</table></div>';
