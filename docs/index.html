@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819k';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819l';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -562,7 +562,7 @@ mgo.addEventListener('click',function(){
 })();
 
 /* ── topluluk linkleri (Telegram odaları — linkler gelince aktifleşir) ── */
-window.GX_COMMUNITY={forum:'https://t.me/eva_trade_alerts_bot',duyuru:'https://t.me/eva_trade_alerts_bot',pro:'https://t.me/eva_trade_alerts_bot'};
+window.GX_COMMUNITY={forum:'',duyuru:'',pro:''}; /* gerçek kanal/grup açılınca buraya @linkler gelecek — şimdilik dürüstçe "Kuruluyor" */
 (function(){var m={forum:['cbForum','💬 Telegram\'a Katıl'],duyuru:['cbDuyuru','📢 Kanala Katıl'],pro:['cbPro','🔒 Telegram\'a Katıl']};
 Object.keys(m).forEach(function(k){var el=q(m[k][0]),u=(window.GX_COMMUNITY||{})[k];
 if(el&&u){el.href=u;el.textContent=m[k][1];el.style.opacity='1';el.style.pointerEvents='auto';el.target='_blank';}});})();
