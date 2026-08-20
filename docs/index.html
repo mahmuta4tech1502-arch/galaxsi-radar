@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819s';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819t';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -226,9 +226,33 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
   <div id="fresh"></div>
   <div class="panel"><div class="phead"><span class="dot"></span>DELIST_RADARI :: resmî borsa duyuruları</div><div class="pbody" id="delist"><div class="item mut">bağlanıyor…</div></div></div>
   <div class="panel"><div class="phead"><span class="dot"></span>ALARM_AGI :: depeg / funding / open-interest</div><div class="pbody" id="risk"><div class="item mut">bağlanıyor…</div></div></div>
-  <div class="panel"><div class="phead"><span class="dot"></span>ARKEOLOJI :: geçmişin ölçümü — tahmin değil</div><div class="pbody" id="ark"><div class="item mut">günlük analiz bekleniyor…</div></div></div>
+  <!-- 🔒 PRO ÖZEL: AI Laboratuvarı + Sızıntı Arkeolojisi — sadece üyeler, tıkla-aç -->
+  <div class="panel"><div class="phead"><span class="dot" style="background:var(--yel);box-shadow:0 0 8px var(--yel)"></span>🔒 PRO ÖZEL :: 🤖 AI Laboratuvarı + 🕵️ Sızıntı Arkeolojisi</div>
+  <div class="pbody">
+    <div id="pgTeaser">
+      <div class="item mut">// Yapay zekâ bulgu analizi (30 dk'da bir yenilenir) + delist duyurusundan <b>ÖNCEKİ 48 saatin</b> sızıntı ölçümleri — <b class="yel">sadece Pro üyelere özel</b>.</div>
+      <a href="#pro" class="btn btn-g" style="margin-top:8px;display:inline-block">🔓 Pro ile Aç → paketlere bak ($2.99'dan)</a>
+    </div>
+    <div id="pgOpen" style="display:none">
+      <div class="item grn" style="margin-bottom:8px">✅ Pro üyeliğin aktif — özel analizlerin hazır.</div>
+      <button id="pgBtn" style="background:var(--grn);color:#04140b;border:0;border-radius:8px;padding:11px 22px;font:inherit;font-weight:700;cursor:pointer">🤖🕵️ ÖZEL ANALİZLERİ AÇ ▼</button>
+    </div>
+  </div></div>
+  <div id="pgPanels" style="display:none">
+  <div class="panel"><div class="phead"><span class="dot"></span>ARKEOLOJI :: geçmişin ölçümü — tahmin değil (Pro)</div><div class="pbody" id="ark"><div class="item mut">günlük analiz bekleniyor…</div></div></div>
 
-  <div class="panel"><div class="phead"><span class="dot"></span>🤖 AI LABORATUVARI :: yapay zeka bulgu analizi — 30 dk'da bir yenilenir</div><div class="pbody" id="ailab"><div class="item mut">AI analizi yükleniyor…</div></div></div>
+  <div class="panel"><div class="phead"><span class="dot"></span>🤖 AI LABORATUVARI :: yapay zeka bulgu analizi — 30 dk'da bir yenilenir (Pro)</div><div class="pbody" id="ailab"><div class="item mut">AI analizi yükleniyor…</div></div></div>
+  </div>
+  <script>
+  (function(){
+    function isPro(){try{var p=JSON.parse(localStorage.getItem('gx_pro')||'null');return !!(p&&p.tip&&(!p.exp||Date.now()<p.exp));}catch(e){return false;}}
+    var t=document.getElementById('pgTeaser'),o=document.getElementById('pgOpen'),p=document.getElementById('pgPanels'),b=document.getElementById('pgBtn');
+    function refresh(){var pro=isPro();t.style.display=pro?'none':'block';o.style.display=pro?'block':'none';if(!pro)p.style.display='none';}
+    if(b)b.addEventListener('click',function(){var open=p.style.display!=='none';p.style.display=open?'none':'block';b.textContent=open?'🤖🕵️ ÖZEL ANALİZLERİ AÇ ▼':'▲ ÖZEL ANALİZLERİ GİZLE';if(!open)p.scrollIntoView({behavior:'smooth',block:'start'});});
+    refresh();
+    window.GX_refreshProGate=refresh; /* kod girilince aninda acilsin */
+  })();
+  </script>
   <script>
   (function(){var el=document.getElementById('ailab');
   fetch('./data/ai_yorum.json').then(function(r){return r.json()}).then(function(a){
@@ -592,6 +616,7 @@ mgo.addEventListener('click',function(){
     state.innerHTML='<div class="verdict v-safe" style="font-size:14px">✅ <b>GALAXSI Pro AKTİF</b> — '+esc(tip)+' üyeliği · üye araçların aşağıda açıldı 👇</div>';
     document.querySelectorAll('.plan .sub').forEach(function(b){b.textContent='✓ Zaten Pro';b.style.opacity='.55';b.disabled=true});
     if(window.GX_showPro)window.GX_showPro();
+    if(window.GX_refreshProGate)window.GX_refreshProGate();
   }
   var saved=null;try{saved=JSON.parse(localStorage.getItem('gx_pro')||'null')}catch(e){}
   if(saved&&saved.tip&&(!saved.exp||Date.now()<saved.exp))showActive(saved.tip);
