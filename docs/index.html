@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819t';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819u';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -197,8 +197,18 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
 
   <section id="duyurular">
     <div class="ttl">📢 Duyurular &amp; Gelişmeler <span id="duyBadge" class="duy-badge" style="display:none"></span></div>
-    <div class="item mut" style="margin-bottom:12px">// yeni özellikler, kritik bayraklar ve sistem haberleri — <b class="grn">otomatik</b> güncellenir</div>
-    <div id="duyFeed" class="duy-feed"><div class="item mut">yükleniyor…</div></div>
+    <div class="item mut" style="margin-bottom:10px">// yeni özellikler, kritik bayraklar ve sistem haberleri — <b class="grn">otomatik</b> güncellenir</div>
+    <div style="text-align:center;margin-bottom:10px">
+      <button id="duyToggle" style="background:#0a100d;color:var(--grn);border:1px solid var(--line2);border-radius:9px;padding:12px 24px;font:inherit;font-weight:700;font-size:14.5px;cursor:pointer">📢 DUYURULARI AÇ ▼</button>
+    </div>
+    <div id="duyWrap" style="display:none">
+      <div id="duyFeed" class="duy-feed"><div class="item mut">yükleniyor…</div></div>
+    </div>
+    <script>(function(){var b=document.getElementById('duyToggle'),w=document.getElementById('duyWrap');
+    function openFeed(){w.style.display='block';b.textContent='▲ DUYURULARI GİZLE';}
+    if(b&&w)b.addEventListener('click',function(){var open=w.style.display!=='none';if(open){w.style.display='none';b.textContent='📢 DUYURULARI AÇ ▼';}else{openFeed();w.scrollIntoView({behavior:'smooth',block:'start'});}});
+    var bt=document.getElementById('duyBannerText');if(bt)bt.addEventListener('click',openFeed); /* üst banner tıklanınca feed açılır */
+    })();</script>
   </section>
 
   <section>
