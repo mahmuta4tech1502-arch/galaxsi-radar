@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819r';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819s';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -245,6 +245,12 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
   <section id="pro">
     <div class="ttl">🛡️ Nöbete Katıl — GALAXSI Pro</div>
     <div class="item mut" style="margin-bottom:12px">// Kâr sinyali satmıyoruz; <b class="grn">tehlikeyi gösteriyoruz</b>. Sen coine girmeden önce biz taramayı bitiriyoruz. Süre bitince <b class="yel">otomatik kesinti YOK</b> — istediğin kadar kal.</div>
+    <div style="border:1px solid var(--line2);background:linear-gradient(135deg,#0c2416,#0a100d);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center">
+      <div style="font-size:15px;color:var(--txt);margin-bottom:4px">🛡️ <b>Nöbet Paketleri</b> — ⚡ 24 saat · 🛡️ 1 hafta · 📡 1 ay · 🦉 dedektif</div>
+      <div class="item mut" style="margin-bottom:10px">$2.99'dan başlar · kripto ile öde (DOGE/XRP/USDT/BTC) · otomatik kesinti yok</div>
+      <button id="planToggle" style="background:var(--grn);color:#04140b;border:0;border-radius:9px;padding:13px 26px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;letter-spacing:.03em;box-shadow:0 0 16px rgba(57,255,136,.3)">🛡️ ÜYELİK PAKETLERİNİ AÇ ▼</button>
+    </div>
+    <div id="planWrap" style="display:none">
     <div class="plans">
       <div class="plan">
         <div class="badge" style="background:var(--yel);color:#3a2c00">🦉 EN DERİN</div>
@@ -277,6 +283,8 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
       </div>
     </div>
     <div class="item mut" style="margin:10px 0 4px">🔜 <b class="yel">Yolda (üyeliğin kapsar, gelince otomatik açılır):</b> 🔥 Nöbet Serisi (streak) · 🎖️ rozetler ("Delist'ten Döndüm", "Rug Radarı") · 🪜 rütbe merdiveni (İzci→Radar Ustası) · 🏆 Avcı Ligi — <b>en çok tuzaktan KAÇAN kazanır</b> · 👁️ izleme listesi + anlık alarm</div>
+    </div>
+    <script>(function(){var b=document.getElementById('planToggle'),w=document.getElementById('planWrap');if(b&&w)b.addEventListener('click',function(){var open=w.style.display!=='none';w.style.display=open?'none':'block';b.textContent=open?'🛡️ ÜYELİK PAKETLERİNİ AÇ ▼':'▲ PAKETLERİ GİZLE';if(!open)w.scrollIntoView({behavior:'smooth',block:'start'});});})();</script>
     <div id="prostate"></div>
     <div class="panel" style="margin-top:12px"><div class="phead"><span class="dot" style="background:var(--yel);box-shadow:0 0 8px var(--yel)"></span>ÜYELİK KODU :: hediye/kampanya kodun varsa gir</div>
     <div class="pbody">
