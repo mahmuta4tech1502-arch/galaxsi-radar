@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819v';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819w';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -246,7 +246,14 @@ window.addEventListener('load',function(){setTimeout(function(){var s=document.c
   var t=setInterval(function(){var s=document.getElementById('s-flags');var c=document.getElementById('delistCnt');
   if(s&&c&&s.textContent&&s.textContent!=='—'){c.textContent='· '+s.textContent+' aktif bayrak';clearInterval(t);}},800);setTimeout(function(){clearInterval(t)},15000);
   })();</script>
+  <div style="text-align:center;margin:4px 0 10px">
+    <button id="riskToggle" style="background:#0a100d;color:var(--cyan);border:1px solid #0e2a30;border-radius:9px;padding:12px 24px;font:inherit;font-weight:700;font-size:14.5px;cursor:pointer">🚨 ALARM AĞINI AÇ ▼ <span class="mut" style="font-weight:400">· depeg / funding / OI</span></button>
+  </div>
+  <div id="riskWrap" style="display:none">
   <div class="panel"><div class="phead"><span class="dot"></span>ALARM_AGI :: depeg / funding / open-interest</div><div class="pbody" id="risk"><div class="item mut">bağlanıyor…</div></div></div>
+  </div>
+  <script>(function(){var b=document.getElementById('riskToggle'),w=document.getElementById('riskWrap');
+  if(b&&w)b.addEventListener('click',function(){var open=w.style.display!=='none';w.style.display=open?'none':'block';b.firstChild.textContent=open?'🚨 ALARM AĞINI AÇ ▼ ':'▲ ALARM AĞINI GİZLE ';if(!open)w.scrollIntoView({behavior:'smooth',block:'start'});});})();</script>
   <!-- 🔒 PRO ÖZEL: AI Laboratuvarı + Sızıntı Arkeolojisi — sadece üyeler, tıkla-aç -->
   <div class="panel"><div class="phead"><span class="dot" style="background:var(--yel);box-shadow:0 0 8px var(--yel)"></span>🔒 PRO ÖZEL :: 🤖 AI Laboratuvarı + 🕵️ Sızıntı Arkeolojisi</div>
   <div class="pbody">
