@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>GALAXSI — Kripto Tehlike Radarı</title>
 <script>/* OTO-GUNCELLEME: eski cache'i taze surumle otomatik degistir — kimse cache ile ugrasmasin */
-(function(){try{var GX_VER='20260819l';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
+(function(){try{var GX_VER='20260819m';var cur=(location.search.match(/[?&]v=([^&]+)/)||[])[1]||'';
 fetch('/ver.json?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
 if(j&&j.v&&j.v!==GX_VER&&j.v!==cur){location.replace(location.pathname+'?v='+encodeURIComponent(j.v));}}).catch(function(){});}catch(e){}})();</script>
 <meta name="description" content="GALAXSI: kripto tuzaklarını insanlardan önce gören tehlike radarı. Coin risk taraması, resmî delist takibi, sızıntı arkeolojisi, depeg ve OI alarmları. Kâr sinyali satmaz; riski gösterir.">
@@ -140,8 +140,9 @@ body{top:0!important}
 </head>
 <body>
 <div id="gtbar"><span class="g">🌐</span><div id="google_translate_element"></div></div>
-<script>function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'tr',autoDisplay:false},'google_translate_element');}</script>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'tr',autoDisplay:false},'google_translate_element');}
+/* PERF: Google Translate'i sayfa yüklendikten SONRA yükle — ilk render'ı bloke etme (PageSpeed ~760ms tasarruf) */
+window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';s.async=true;document.head.appendChild(s);},1200);});</script>
 <canvas id="rain"></canvas>
 <div class="vignette"></div>
 
